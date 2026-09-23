@@ -1,7 +1,7 @@
 ---
 title: Extract Console Hub into an independent application
 date: 2026-09-12
-status: In Progress
+status: Done
 summary: Move the complete Console Hub into its own repository and leave Cockpit with a launch-only seam.
 spec:
 ---
@@ -338,6 +338,31 @@ Console Hub checks, once the new repository exists:
   embedded Hub runtime.
 
 ## Changelog
+
+### 2026-09-23 (steps 9-11 complete)
+- **Step 9.** Cockpit's `console-hub-launch` module opens `consolehub://launch/v1`, optionally with
+  a Workspace or a project handoff, and returns a typed result (`unavailable`,
+  `invalid-workspace`, `failed`). The Rest plate and the status link call it. No Projects screen
+  exists yet, so project launch is reachable through the module and preload only.
+- **Step 10.** Cockpit no longer contains any Hub modules, IPC, preload groups, shared types,
+  config fields, shutdown hooks, or Hub scripts, and it has dropped node-pty, xterm, and the Pi
+  runner. Cockpit keeps Hub keys already in `cockpit.config.json` on rewrite so a later Console
+  Hub import still finds them. A boundary test fails if any Hub module, channel, or dependency
+  returns.
+- **Step 11 found a defect.** electron-builder ignores `protocols` for NSIS on Windows, so the
+  installed Console Hub never registered `consolehub://`. `build/installer.nsh` now registers it
+  and removes it on uninstall, and the packaged app repairs a missing registration at startup.
+- **Step 11 verified** with `scripts/verify-cutover.mjs` against the installed Console Hub and a
+  packaged Cockpit. All nine scenarios passed. Package inspection with positive controls found no
+  Hub code in Cockpit and no Cockpit surfaces in Console Hub. Uninstall removed the protocol key
+  and kept both apps' user data, and Cockpit then reported Console Hub as not installed.
+- **Deviations.** No clean Windows 11 profile was available because Windows Sandbox is not
+  enabled, so step 11 ran on the working profile. Cockpit ran from its packaged `win-unpacked`
+  build and was not installed, because its NSIS installer is built but installing it would
+  shadow the working development copy. Migration retry and corruption are covered by unit tests,
+  not by the packaged app, because the real receipt already exists.
+- Ported Cockpit's uncommitted `/mission` fix: a free-form `/mission <direction>` line is now
+  consumed by Console Hub instead of reaching the Vendor CLI as an unknown skill.
 
 ### 2026-09-21 (step 2 complete)
 - **Step 2 done.** `PRODUCT.md` and `DESIGN.md` now state the independent-product boundary, so code

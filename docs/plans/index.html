@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Studybuddy &mdash; Plan Dashboard</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --card: #161b22;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --border: #30363d;
+    --in-progress: #388bfd;
+    --blocked: #f85149;
+    --approved: #d29922;
+    --draft: #6e7681;
+    --done: #2ea043;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 32px;
+  }
+  h1 {
+    font-size: 22px;
+    margin: 0 0 4px 0;
+  }
+  .subtitle {
+    color: var(--text-muted);
+    font-size: 13px;
+    margin: 0 0 20px 0;
+  }
+  .badge-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+  }
+  .badge-row .count {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+  }
+  .group {
+    margin-bottom: 28px;
+  }
+  .group > summary, .group-title {
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    cursor: pointer;
+    list-style: none;
+  }
+  .group > summary::-webkit-details-marker { display: none; }
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 12px;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .card a.title {
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+  .card a.title:hover {
+    text-decoration: underline;
+  }
+  .card .meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .status-badge {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #0d1117;
+  }
+  .status-in-progress { background: var(--in-progress); color: #fff; }
+  .status-blocked { background: var(--blocked); color: #fff; }
+  .status-approved { background: var(--approved); }
+  .status-draft { background: var(--draft); color: #fff; }
+  .status-done { background: var(--done); color: #fff; }
+  .card .summary {
+    margin-top: 8px;
+    font-size: 12.5px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+
+<h1>Studybuddy &mdash; Plan Dashboard</h1>
+<p class="subtitle">Regenerated 2026-09-23</p>
+
+<div class="badge-row">
+  <span class="count"><span class="dot" style="background:var(--in-progress)"></span>2 In Progress</span>
+  <span class="count"><span class="dot" style="background:var(--blocked)"></span>0 Blocked</span>
+  <span class="count"><span class="dot" style="background:var(--approved)"></span>0 Approved</span>
+  <span class="count"><span class="dot" style="background:var(--draft)"></span>1 Draft</span>
+  <span class="count"><span class="dot" style="background:var(--done)"></span>5 Done</span>
+</div>
+
+<div class="group">
+  <div class="group-title">In Progress (2)</div>
+  <div class="cards">
+    <div class="card">
+      <a class="title" href="vscode://file/C:/FIles/Console-Hub/docs/plans/2026-09-05-cockpit-mission.md">Cockpit Mission</a>
+      <div class="meta"><span class="status-badge status-in-progress">In Progress</span><span>2026-09-05</span></div>
+      <div class="summary">Run isolated, validated implementation lanes through the agent terminals already selected on Console.</div>
+    </div>
+    <div class="card">
+      <a class="title" href="vscode://file/C:/FIles/Console-Hub/docs/plans/2026-08-27-console-hub.md">Console Hub — fans of models, and consoles wired to each other</a>
+      <div class="meta"><span class="status-badge status-in-progress">In Progress</span><span>2026-08-27</span></div>
+      <div class="summary">Ask four models one question and get one scored comparison, then hand the same brief to four models in four worktrees and get four real diffs. Phase 1 is a plate. Phase 2 is the full canvas with wires, loops and worktrees. The Console Recipe separately gained the same Orchestrator-plus-grid shape for real terminals (2026-09-04), reversing ADR 0028.</div>
+    </div>
+  </div>
+</div>
+
+<div class="group">
+  <div class="group-title">Draft (1)</div>
+  <div class="cards">
+    <div class="card">
+      <a class="title" href="vscode://file/C:/FIles/Console-Hub/docs/plans/2026-09-07-console-hub-friction.md">Console Hub workflow friction</a>
+      <div class="meta"><span class="status-badge status-draft">Draft</span><span>2026-09-07</span></div>
+      <div class="summary">Make the Orchestrator own worker coordination and make assigned Mission work reliably visible.</div>
+    </div>
+  </div>
+</div>
+
+<details class="group">
+  <summary>Done (5)</summary>
+  <div class="cards">
+    <div class="card">
+      <a class="title" href="vscode://file/C:/FIles/Console-Hub/docs/plans/2026-09-12-console-hub-extraction.md">Extract Console Hub into an independent application</a>
+      <div class="meta"><span class="status-badge status-done">Done</span><span>2026-09-12</span></div>
+      <div class="summary">Move the complete Console Hub into its own repository and leave Cockpit with a launch-only seam.</div>
+    </div>
+    <div class="card">
+      <a class="title" href="vscode://file/C:/FIles/Console-Hub/docs/plans/2026-09-03-console-hub-calibrated-instrument.md">Console Hub Calibrated Instrument Overhaul</a>
+      <div class="meta"><span class="status-badge status-done">Done</span><span>2026-09-03</span></div>
+      <div class="summary">Transform the Console Hub into a unified aerospace instrument deck: integrated pipeline header, chamfered config tool strip, top-level Return to Rest affordance, causal bus wiring Orchestrator to Workers, 3-cell telemetry, and Live Stack chamfers.</div>
+    </div>
+    <div class="card">
+      <a class="title" href="vscode://file/C:/FIles/Console-Hub/docs/plans/2026-09-01-console-plate.md">The console is a plate, not an overlay</a>
+      <div class="meta"><span class="status-badge status-done">Done</span><span>2026-09-01</span></div>
+      <div class="summary">ConsoleView drops its fixed full-screen frame and becomes the Hub's Console recipe plate; opening a console from anywhere flies to the Hub instead of painting an overlay on the current surface.</div>
+    </div>
+    <div class="card">
+      <a class="title" href="vscode://file/C:/FIles/Console-Hub/docs/plans/2026-09-01-hub-recipes-and-explorer.md">The Hub's Explorer sidebar, its seven Recipes, and vendor rims</a>
+      <div class="meta"><span class="status-badge status-done">Done</span><span>2026-09-01</span></div>
+      <div class="summary">The Console Hub becomes a surface with an Explorer-first sidebar, seven Recipe choices that configure the run plate and its stages, and 2px vendor identity rims on live slots and streams.</div>
+    </div>
+    <div class="card">
+      <a class="title" href="vscode://file/C:/FIles/Console-Hub/docs/plans/2026-09-01-orchestrated-fan.md">The orchestrated fan</a>
+      <div class="meta"><span class="status-badge status-done">Done</span><span>2026-09-01</span></div>
+      <div class="summary">A third fan kind - the user directs an orchestrator, it delegates to the slots, then it collects their findings. Unscored.</div>
+    </div>
+  </div>
+</details>
+
+</body>
+</html>
