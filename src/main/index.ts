@@ -7,6 +7,7 @@ import { attachHubWindow, missionBlocksWorkspaceSwitch, registerHubHandlers, shu
 import { defaultLaunchAgent, fanWorkspace, flushArrangement, flushWorkspace, reloadConfig, saveWorkspace } from './modules/config'
 import { LaunchHandoff } from './launchHandoff'
 import { parseLaunchUrl } from './launchProtocol'
+import { LAUNCH_SCHEME, registerLaunchProtocol } from './protocolRegistration'
 import { importLegacyHubState } from './migration'
 import type { ActivatedLaunch } from '../shared/launch'
 import { checkLaunchAgent } from './launchAgent'
@@ -105,6 +106,9 @@ function createWindow(): void {
 if (claimSingleInstance(app, BrowserWindow)) {
   app.on('second-instance', (_event, args) => receiveLaunch(args, true))
   void app.whenReady().then(async () => {
+    if (!verificationProfile && !registerLaunchProtocol(app) && app.isPackaged) {
+      reportError('Register launch protocol', `${LAUNCH_SCHEME}:// could not be registered`)
+    }
     if (!verificationProfile) {
       try {
         const migration = importLegacyHubState(join(app.getPath('appData'), 'Cockpit'), app.getPath('userData'))
