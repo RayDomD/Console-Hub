@@ -1,0 +1,7 @@
+# Mission worktrees use a separate short storage root
+
+Mission worktrees live under a configurable root outside both the source Workspace and the Vault, with `C:\Cockpit\wt` as the proposed default and a layout of `<run-id>\<lane>` beneath it. Keeping paths short reduces Windows path-length failures, and keeping worktrees outside the Workspace prevents a Mission snapshot from including other worktrees.
+
+Permanent Run Records remain in Cockpit's existing storage. Moving them provides no necessary benefit for this change and would introduce migration work. Worktree deletion follows ADR 0053: save the plan summary and supporting evidence first, then clean up after successful Apply or explicit Reject; retain failed, stopped, and interrupted runs for recovery.
+
+Implementation status (2026-09-13): `missionWorktreeRoot` defaults to `C:\Cockpit\wt`. New runs use `<run-id>\t1`, `t2`, and an `integration` sibling. Existing worktrees are not moved or deleted by this change. Permanent `plan.md` records include the accepted plan, snapshot reference, lane evidence, and per-worktree cleanup journal. Apply and Reject save recovery patches before deletion. Stop retains worktrees. Cleanup failures are recorded and prevent a new draft from losing the active recovery context. The Orchestrator receives the outcome and permanent summary path. Automated worker launch now depends on the Fusion Hub-style controlled runner recorded in ADR 0054.

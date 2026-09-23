@@ -1,0 +1,1141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cockpit — design system</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@50..200,100..900&display=swap" rel="stylesheet">
+<style>
+  /* ---- the system's own tokens, used by this page to describe itself ---- */
+  :root{
+    --ground:#000000;
+    --page:#0A0A0B;
+    --plate:rgba(6,6,7,.86);
+    --plate-edge:rgba(237,237,234,.22);
+    --tick:rgba(237,237,234,.5);
+    --ink:#EDEDEA;
+    --ink-dim:#8E8E88;
+    --ink-idle:#5A5A55;
+    --rule:#2A2A2C;
+    --mono:"Cascadia Mono","Cascadia Code",ui-monospace,"SF Mono",Consolas,monospace;
+    --disp:"Anybody",system-ui,sans-serif;
+    --ease:cubic-bezier(.16,1,.3,1);
+    --chamfer:polygon(0 0,calc(100% - 11px) 0,100% 11px,100% 100%,11px 100%,0 calc(100% - 11px));
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--page);color:var(--ink);font-family:var(--disp);font-size:15.5px;
+    line-height:1.62;-webkit-font-smoothing:antialiased}
+
+  /* browser surfaces belong to the design system too */
+  ::selection{background:var(--ink);color:var(--page)}
+  :focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+  *{scrollbar-width:thin;scrollbar-color:rgba(237,237,234,.24) transparent}
+  *::-webkit-scrollbar{width:9px;height:9px}
+  *::-webkit-scrollbar-track{background:transparent}
+  *::-webkit-scrollbar-thumb{background:rgba(237,237,234,.20)}
+  *::-webkit-scrollbar-thumb:hover{background:rgba(237,237,234,.38)}
+
+  .shell{display:grid;grid-template-columns:210px minmax(0,1fr);gap:0;min-height:100vh}
+  @media(max-width:880px){.shell{grid-template-columns:1fr}}
+
+  /* ---------------- index rail ---------------- */
+  nav{position:sticky;top:0;align-self:start;height:100vh;overflow:auto;
+    border-right:1px solid var(--rule);padding:30px 18px 40px}
+  @media(max-width:880px){nav{position:static;height:auto;border-right:0;border-bottom:1px solid var(--rule)}}
+  nav .id{font-variation-settings:"wdth" 130,"wght" 640;font-size:15px;letter-spacing:.2em;
+    text-transform:uppercase;margin-bottom:3px}
+  nav .sub{font-family:var(--mono);font-size:9px;letter-spacing:.13em;color:var(--ink-idle);
+    text-transform:uppercase;margin-bottom:26px}
+  nav a{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;
+    color:var(--ink-dim);text-decoration:none;padding:5px 0;border-bottom:1px solid transparent}
+  nav a:hover{color:var(--ink)}
+  nav .grp{font-family:var(--mono);font-size:8.5px;letter-spacing:.17em;text-transform:uppercase;
+    color:#4E4E4A;margin:19px 0 5px;border-top:1px solid var(--rule);padding-top:13px}
+  nav .grp:first-of-type{margin-top:0;border-top:0;padding-top:0}
+
+  main{padding:52px 46px 140px;max-width:1010px}
+  @media(max-width:880px){main{padding:34px 22px 90px}}
+
+  h1{font-variation-settings:"wdth" 128,"wght" 720;font-size:47px;line-height:1.03;
+    letter-spacing:-.018em;margin-bottom:16px}
+  h2{font-variation-settings:"wdth" 116,"wght" 660;font-size:27px;line-height:1.14;
+    letter-spacing:-.012em;margin:0 0 6px}
+  h3{font-variation-settings:"wdth" 108,"wght" 620;font-size:17px;margin:30px 0 9px}
+  p{max-width:70ch;color:#C6C6C0;margin-bottom:13px}
+  p strong{color:var(--ink);font-weight:600}
+  em{font-style:normal;color:var(--ink)}
+  code{font-family:var(--mono);font-size:.87em;color:#D6D6D0;
+    background:rgba(237,237,234,.07);padding:1px 5px}
+  a.inline{color:var(--ink);text-decoration:underline;text-underline-offset:3px;
+    text-decoration-color:rgba(237,237,234,.4)}
+
+  section{border-top:1px solid var(--rule);padding-top:34px;margin-top:58px;scroll-margin-top:20px}
+  section:first-of-type{border-top:0;margin-top:0;padding-top:0}
+  .lede{max-width:70ch;color:#A8A8A2;margin-bottom:26px}
+
+  /* a rule stated by the system, quoted verbatim */
+  .rule{max-width:74ch;border-left:1px solid var(--plate-edge);padding:2px 0 2px 15px;
+    margin:18px 0;color:#A0A09A;font-size:14px}
+  .rule strong{color:var(--ink)}
+  .ban{border-left-color:#6E6E68}
+  .ban strong{color:var(--ink)}
+
+  /* ---------------- specimen frames ---------------- */
+  .spec{background:var(--ground);border:1px solid #1C1C1E;padding:26px;margin:20px 0;
+    display:flex;flex-wrap:wrap;gap:26px;align-items:center}
+  .spec.block{display:block}
+  .spec.tight{padding:16px;gap:14px}
+  .cap{font-family:var(--mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;
+    color:var(--ink-idle);margin:0 0 9px}
+
+  table{border-collapse:collapse;width:100%;margin:16px 0;font-size:13.5px;
+    font-variant-numeric:tabular-nums}
+  th,td{text-align:left;padding:9px 13px 9px 0;border-bottom:1px solid var(--rule);vertical-align:top}
+  th{font-family:var(--mono);font-size:8.5px;letter-spacing:.15em;text-transform:uppercase;
+    color:var(--ink-idle);font-weight:400}
+  td{color:#C6C6C0}
+  td strong{color:var(--ink)}
+  td.m,th.m{font-family:var(--mono);font-size:11.5px;white-space:nowrap;color:#D6D6D0}
+
+  /* ---------------- colour ---------------- */
+  .swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:11px;width:100%}
+  .sw{border:1px solid var(--rule)}
+  .sw .chip{height:56px;display:block}
+  .sw .meta{padding:8px 10px;font-family:var(--mono);font-size:10px;line-height:1.55}
+  .sw .meta b{display:block;color:var(--ink);font-weight:400}
+  .sw .meta span{color:var(--ink-idle)}
+  .toks{display:grid;grid-template-columns:repeat(auto-fill,minmax(216px,1fr));gap:10px;width:100%}
+  .tok{display:flex;align-items:center;gap:11px;border:1px solid var(--rule);padding:9px 11px}
+  .tok i{width:26px;height:26px;flex:none;border:1px solid rgba(237,237,234,.14);display:block}
+  .tok div{font-family:var(--mono);font-size:10px;line-height:1.5;min-width:0}
+  .tok b{display:block;color:var(--ink);font-weight:400}
+  .tok span{color:var(--ink-idle);word-break:break-all}
+
+  /* ---------------- plates ---------------- */
+  .plate{position:relative;background:var(--plate);border:1px solid var(--plate-edge);
+    clip-path:var(--chamfer);padding:11px 13px;font-size:11.5px;width:190px}
+  .plate h4{font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;
+    font-weight:400;color:var(--ink-dim);border-bottom:1px solid rgba(237,237,234,.14);
+    padding-bottom:6px;margin-bottom:8px}
+  .plate .row{display:flex;justify-content:space-between;gap:10px;align-items:baseline;margin-bottom:5px}
+  .plate .row:last-child{margin-bottom:0}
+  .corner{position:absolute;width:7px;height:7px;border:1px solid var(--tick);
+    left:-1px;bottom:-1px;border-top:0;border-right:0}
+  .path{font-family:var(--mono);font-size:9px;color:var(--ink-dim)}
+  .st-run{font-family:var(--mono);font-size:9px;color:var(--ink)}
+  .st-idle{font-family:var(--mono);font-size:9px;color:var(--ink-idle)}
+  .st-call{font-family:var(--mono);font-size:9px;border:1px solid var(--ink);padding:0 4px}
+
+  /* ---------------- console hub ---------------- */
+  .console-states{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;width:100%}
+  .console-state{border:1px solid var(--rule);padding:11px;font-family:var(--mono);font-size:9px;letter-spacing:.08em}
+  .console-state b{display:block;width:max-content;max-width:100%;font-weight:400;color:var(--ink);margin-bottom:5px}
+  .console-state span{color:var(--ink-dim)}
+  .console-state.done b{color:var(--ink-dim)} .console-state.idle b{color:var(--ink-idle)}
+  .console-state.fail b{border:1px solid var(--ink);padding:2px 4px}
+  .hub-wires{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;width:100%}
+  .hub-wire{border:1px solid var(--rule);padding:12px}
+  .hub-wire svg{display:block;width:100%;height:auto}
+  .hub-wire p{font-family:var(--mono);font-size:9px;line-height:1.6;color:var(--ink-dim);margin:8px 0 0;max-width:none}
+  .hub-loop{width:100%;height:auto;display:block;border:1px solid var(--rule)}
+  .hub-cards{display:flex;align-items:flex-end;gap:14px;width:100%;min-height:166px;padding:12px}
+  .hub-card{position:relative;background:var(--plate);border:1px solid var(--plate-edge);clip-path:var(--chamfer);font-family:var(--mono);font-size:9px;color:var(--ink-dim);padding:9px}
+  .hub-card b{display:block;font-weight:400;color:var(--ink);letter-spacing:.12em;margin-bottom:6px}
+  .hub-card.strip{width:142px;height:38px}.hub-card.card{width:200px;height:106px}.hub-card.focus{width:292px;height:142px}
+  .hub-runtime{display:grid;grid-template-columns:138px minmax(0,1fr) 174px;width:100%;min-height:238px;border:1px solid var(--plate-edge);background:var(--ground)}
+  .hub-recipes{border-right:1px solid var(--rule);padding:9px 7px;font-family:var(--mono);font-size:8px;letter-spacing:.08em;color:var(--ink-idle)}
+  .hub-recipes b{display:block;padding:2px 4px 7px;font-size:7px;font-weight:400;letter-spacing:.13em;color:var(--ink-dim)}
+  .hub-recipes span{display:block;padding:6px 4px;border-left:1px solid transparent}.hub-recipes span.active{background:rgba(237,237,234,.10);border-left-color:var(--ink);color:var(--ink)}
+  .hub-run{padding:12px;min-width:0}.hub-run h4{font-size:19px;line-height:1.05;font-variation-settings:"wdth" 118,"wght" 680;letter-spacing:-.012em;margin:0 0 5px}.hub-run p{font-size:11px;margin:0;color:var(--ink-dim);max-width:none}
+  .hub-flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:13px 0 8px;border:1px solid var(--rule);font-family:var(--mono);font-size:8px;letter-spacing:.08em;color:var(--ink-idle)}
+  .hub-flow span{padding:7px 8px;border-right:1px solid var(--rule)}.hub-flow span:last-child{border-right:0}.hub-flow span.active{background:var(--ink);color:var(--page)}
+  .hub-streams{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.hub-stream{min-height:92px;border:1px solid var(--rule);padding:7px;font-family:var(--mono);font-size:8px;line-height:1.55;color:var(--ink-dim)}
+  .hub-stream b{display:block;color:var(--ink);font-weight:400;letter-spacing:.08em}.hub-stream em{display:block;color:var(--ink-idle);font-size:7px}.hub-stream .live{color:var(--ink)}
+  .hub-stream:nth-child(1){border-top:2px solid transparent;border-image:linear-gradient(90deg,#F05050,#F0D24A,#7BE38C,#3FD0C8,#5AA9F0,#C9A2F0,#E86FD0) 1}.hub-stream:nth-child(2){border-top:2px solid #5AA9F0}.hub-stream:nth-child(3){border-top:2px solid #F0871F}
+  .hub-stack{border-left:1px solid var(--rule);padding:10px;font-family:var(--mono);font-size:8px;color:var(--ink-dim)}.hub-stack b{display:block;color:var(--ink);font-weight:400;letter-spacing:.12em;margin-bottom:9px}.hub-stack div{padding:6px 0;border-bottom:1px solid var(--rule)}.hub-stack div:last-child{border-bottom:0}.hub-stack span{display:block;color:var(--ink-idle);font-size:7px;margin-top:2px}
+  @media(max-width:700px){.hub-runtime{grid-template-columns:56px minmax(0,1fr)}.hub-stack{display:none}.hub-streams{grid-template-columns:1fr}.hub-flow{grid-template-columns:1fr 1fr}}
+
+  /* ---------------- controls ---------------- */
+  .seg{display:flex;gap:3px}
+  .seg button{font-family:var(--mono);font-size:9px;letter-spacing:.04em;color:var(--ink-dim);
+    cursor:pointer;background:transparent;border:1px solid rgba(237,237,234,.16);padding:6px 13px}
+  .seg button[aria-pressed=true]{background:var(--ink);color:var(--page);border-color:var(--ink)}
+  .lab{font-family:var(--mono);font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;
+    color:#6E6E68;margin:0 0 5px;display:flex;justify-content:space-between;gap:14px}
+  .lab em{color:#C4C4BE;font-size:9px}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:172px;height:3px;
+    background:rgba(237,237,234,.16);outline:0}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:11px;
+    background:var(--ink);cursor:pointer;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)}
+  input[type=range]::-moz-range-thumb{width:11px;height:11px;background:var(--ink);border:0;cursor:pointer}
+  .chk{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:9.5px;
+    color:#C4C4BE;cursor:pointer}
+  .chk input{appearance:none;width:11px;height:11px;border:1px solid rgba(237,237,234,.4);
+    background:transparent;cursor:pointer;flex:none}
+  .chk input:checked{background:var(--ink)}
+  .btn{font-family:var(--mono);font-size:9px;color:#C4C4BE;cursor:pointer;background:transparent;
+    border:1px solid rgba(237,237,234,.22);padding:7px 15px}
+  .btn:hover{border-color:var(--ink);color:var(--ink)}
+  .btn.solid{background:var(--ink);color:var(--page);border-color:var(--ink);
+    letter-spacing:.1em;text-transform:uppercase}
+  .tuneBtn{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--ink-dim);cursor:pointer;background:var(--plate);
+    border:1px solid var(--plate-edge);padding:5px 11px;
+    clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px))}
+
+  /* ---------------- marks + icons ---------------- */
+  .marks{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:13px;width:100%}
+  .mk{border:1px solid var(--rule);padding:13px}
+  .mk .top{display:flex;align-items:center;gap:11px;margin-bottom:8px}
+  .mk img{width:30px;height:30px;flex:none;display:block}
+  .mk b{font-family:var(--mono);font-size:11px;font-weight:400;color:var(--ink)}
+  .mk p{font-size:11.5px;color:var(--ink-dim);margin:0;max-width:none;line-height:1.5}
+  .mk .fillnote{font-family:var(--mono);font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;
+    color:#5E5E58;margin-top:7px}
+  .icons{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:15px;width:100%}
+  .ico{display:flex;flex-direction:column;align-items:center;gap:8px}
+  .ico svg{width:30px;height:30px;display:block}
+  .ico span{font-family:var(--mono);font-size:8.5px;letter-spacing:.05em;color:var(--ink-idle);text-align:center}
+
+  /* ---------------- live canvases ---------------- */
+  .layouts{display:grid;grid-template-columns:repeat(auto-fill,minmax(216px,1fr));gap:14px;width:100%}
+  .lay{border:1px solid var(--rule)}
+  .lay canvas{display:block;width:100%;aspect-ratio:1/1;background:var(--ground)}
+  .lay .n{font-family:var(--mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;
+    color:var(--ink-dim);padding:8px 10px;border-top:1px solid var(--rule)}
+  .lay .n em{color:var(--ink-idle);letter-spacing:0;text-transform:none;font-size:10px}
+  .motion{display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%}
+  @media(max-width:660px){.motion{grid-template-columns:1fr}}
+  .motion figure{border:1px solid var(--rule)}
+  .motion canvas{display:block;width:100%;height:88px;background:var(--ground)}
+  .motion figcaption{font-family:var(--mono);font-size:9.5px;color:var(--ink-dim);padding:8px 10px;
+    border-top:1px solid var(--rule);line-height:1.5}
+  .motion figcaption b{color:var(--ink);font-weight:400}
+  .bad figcaption b{color:#9A9A94}
+
+  .owed{border:1px solid var(--rule);padding:19px 21px;margin-top:20px}
+  .owed h3{margin-top:0}
+  footer{border-top:1px solid var(--rule);margin-top:64px;padding-top:22px;
+    font-family:var(--mono);font-size:10px;color:var(--ink-idle);line-height:1.8}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<nav>
+  <div class="id">Cockpit</div>
+  <div class="sub">Design system</div>
+
+  <div class="grp">Foundation</div>
+  <a href="#world">The world</a>
+  <a href="#colour">Colour</a>
+  <a href="#type">Type</a>
+
+  <div class="grp">Components</div>
+  <a href="#marks">Node marks</a>
+  <a href="#plates">Instrument plates</a>
+  <a href="#console-hub">Console Hub</a>
+  <a href="#controls">Controls</a>
+  <a href="#icons">Icons</a>
+
+  <div class="grp">Layer 0</div>
+  <a href="#layouts">Layouts</a>
+  <a href="#sentinel">Vault sentinel</a>
+  <a href="#anchors">Cluster anchors</a>
+  <a href="#motion">Motion</a>
+  <a href="#input">Input</a>
+
+  <div class="grp">Boundaries</div>
+  <a href="#refused">Refused</a>
+  <a href="#owed">Owed &amp; unwritten</a>
+</nav>
+
+<main>
+
+<h1>Cockpit design system</h1>
+<p class="lede">Everything below is rendered by the same code that draws the product, not pictured.
+The marks, plates, controls and layouts on this page are live; if a rule and its specimen disagree,
+the specimen is telling the truth. Written from the locked direction before the build, which means
+every value is a decision rather than a measurement until the finish review confirms it.</p>
+
+<!-- ============================ WORLD ============================ -->
+<section id="world">
+  <h2>The world</h2>
+  <p>You look <strong>out</strong>, not down. Cockpit is a canopy onto the corpus: the second brain is
+  a volume of indexed knowledge inside a geodesic cage, every particle in it swimming, and the
+  interface is a small number of hard-edged instrument plates floating in your line of sight. You can
+  turn the volume with your hand. Pressing it flattens it into a map you can sort.</p>
+  <p>This refuses the category default it replaces — the agentic-OS panel grid on a dark canvas, which
+  was built, committed, and discarded. In the panel grid the corpus is <em>content inside a widget</em>.
+  Here the corpus is the ground you are looking at, and the widgets are instruments over it.</p>
+
+  <div class="rule"><strong>Two kinds of matter.</strong> Inside, in colour: one node per indexed
+  file — 583 across Vault, Skills and The Brewery. Outside, in mono: the seven efforts, riding
+  vertices of the cage. Those are repos Cockpit launches into but does not index. You can see at a
+  glance what the product knows and what it merely runs.</div>
+
+  <div class="rule"><strong>Every node must resolve to a real file.</strong> The moment a node is
+  drawn that corresponds to nothing, the field is wallpaper and must be deleted rather than tuned.</div>
+</section>
+
+<!-- ============================ COLOUR ============================ -->
+<section id="colour">
+  <h2>Colour</h2>
+  <p class="lede">The shell is achromatic. The second brain is not, and it is the only thing that is
+  not.</p>
+
+  <h3>The cluster palette</h3>
+  <p>Seven hues at one mid-luminance band, so no cluster dominates and each reads on both grounds.
+  Colour appears in exactly two places — the nodes themselves, and the legend that names the
+  clusters. Not in plates, not in buttons, not in state, not in icons.</p>
+  <div class="spec"><div class="swatches" id="swatches"></div></div>
+
+  <h3>Shell tokens</h3>
+  <div class="spec"><div class="toks" id="toks"></div></div>
+
+  <div class="rule"><strong>Colour never carries state.</strong> Nothing in the product requires
+  colour vision to operate. The five states read as glyph forms first:</div>
+  <div class="spec tight">
+    <div class="plate" style="width:210px">
+      <div class="corner"></div>
+      <h4>In flight</h4>
+      <div class="row"><span>The Brewery</span><span class="st-run">▮▮▮▮ RUN 2m14</span></div>
+      <div class="row"><span style="color:var(--ink-dim)">Cockpit</span><span class="st-idle" style="color:var(--ink-dim)">▮▮▮▮ DONE 41s</span></div>
+      <div class="row"><span>Studybuddy</span><span class="st-call">▯▮▯▮ EXIT 1</span></div>
+      <div class="row"><span>Enactus</span><span class="st-call">CALL</span></div>
+      <div class="row"><span style="color:var(--ink-idle)">Vault</span><span class="st-idle">▯▯▯▯ IDLE</span></div>
+    </div>
+    <table style="flex:1;min-width:260px;margin:0">
+      <tr><td class="m">Running</td><td><strong>▮▮▮▮ RUN 2m14</strong>, full ink, filled glyph</td></tr>
+      <tr><td class="m">Done</td><td><strong>▮▮▮▮ DONE 41s</strong>, dimmed ink, filled glyph</td></tr>
+      <tr><td class="m">Failed</td><td><strong>▯▮▯▮ EXIT 1</strong>, full ink, broken glyph in a 1px box</td></tr>
+      <tr><td class="m">Wants you</td><td><strong>CALL</strong> in a 1px stroked box — never a pulse</td></tr>
+      <tr><td class="m">Idle</td><td><strong>▯▯▯▯ IDLE</strong>, idle ink, hollow glyph</td></tr>
+    </table>
+  </div>
+  <div class="rule ban"><strong>The wants-you signal arrives once and holds.</strong> It never
+  pulses — and it is the one thing in the product that must not, precisely because everything in
+  layer&nbsp;0 moves. A breathing alert is an alarm that cannot be dismissed.</div>
+</section>
+
+<!-- ============================ TYPE ============================ -->
+<section id="type">
+  <h2>Type</h2>
+  <p><strong>Anybody</strong> for display and UI, <strong>Cascadia Mono</strong> for anything
+  measured. The Cascadia choice is a product argument, not a habit: the embedded terminal renders in
+  it, so widget data and terminal output speak in one voice.</p>
+
+  <div class="spec block">
+    <div class="cap">Wordmark · wdth 130 · wght 620 · .22em</div>
+    <div style="font-variation-settings:'wdth' 130,'wght' 620;font-size:26px;letter-spacing:.22em">COCKPIT</div>
+    <div class="cap" style="margin-top:26px">Display · wdth 116 · wght 660</div>
+    <div style="font-variation-settings:'wdth' 116,'wght' 660;font-size:34px;letter-spacing:-.012em">Seven efforts, one window</div>
+    <div class="cap" style="margin-top:26px">UI text · wght 450</div>
+    <div style="font-variation-settings:'wght' 450;font-size:15px;max-width:60ch">The vault is the truth; Cockpit is a lens. State lives in markdown you own and can read without this app.</div>
+    <div class="cap" style="margin-top:26px">Data · Cascadia Mono · tabular</div>
+    <div style="font-family:var(--mono);font-size:12px;font-variant-numeric:tabular-nums;color:#D6D6D0">
+      C:\Files\The Brewery · 136 files · ↑2 ↓0 · 4h ago<br>583 INDEXED · 7 CLUSTERS · 2026·08·27
+    </div>
+  </div>
+
+  <table>
+    <thead><tr><th>Role</th><th>Face</th><th>Setting</th></tr></thead>
+    <tbody>
+      <tr><td>Wordmark</td><td>Anybody</td><td class="m">wdth 130 · wght 620 · 13px · .22em · upper</td></tr>
+      <tr><td>Display</td><td>Anybody</td><td class="m">wdth 112–130 · wght 640–720</td></tr>
+      <tr><td>UI text</td><td>Anybody</td><td class="m">wght 400–500</td></tr>
+      <tr><td>Data, paths, counts</td><td>Cascadia Mono</td><td class="m">9–11px · .10em on caps</td></tr>
+      <tr><td>Plate label</td><td>Cascadia Mono</td><td class="m">9px · .16em · upper · --ink-dim</td></tr>
+    </tbody>
+  </table>
+  <div class="rule"><strong>Both faces are self-hosted.</strong> The app opens offline and must not
+  wait on a CDN. This page's Google Fonts link is a documentation convenience and must not survive
+  into the build.</div>
+</section>
+
+<!-- ============================ MARKS ============================ -->
+<section id="marks">
+  <h2>Node marks</h2>
+  <p class="lede">A node encodes three things at once and only one of them is colour:
+  <strong>shape is type, fill is trust, colour is cluster.</strong> This is why the field reads as a
+  corpus rather than as generic particles.</p>
+  <p>The five types are the vault's own closed vocabulary, read from <code>.vault-standard.yml</code>
+  — not invented, and not extendable. The standard says in bold <em>"Do not invent a sixth."</em></p>
+
+  <div class="spec"><div class="marks" id="markGrid"></div></div>
+
+  <div class="rule"><strong>Fill is the payload.</strong> Filled means endorsed, operative or owned.
+  Hollow means captured but not claimed — "cite or don't claim" made visible. Of 61 typed notes,
+  <strong>41 are <code>resource</code> against 7 <code>concept</code></strong>. The honest picture is
+  a corpus heavy with captured material and light on original claims, and the design shows that
+  rather than flattering it.</div>
+
+  <h3>Size regimes</h3>
+  <p>Below <code>1.6px</code> every mark collapses to a plain dot. At rest the volume is texture and
+  nobody is reading individual types; shape resolves as nodes grow. A shape nobody can see is not
+  information.</p>
+  <div class="spec"><canvas id="sizeRamp" width="1600" height="150" style="width:100%;height:75px"></canvas></div>
+
+  <div class="rule">Each mark draws in two passes: an additive bloom at <code>3.4 × r</code> and
+  <code>0.30 α</code> so marks sit <em>in</em> light rather than on flat black, then the crisp mark.
+  Filled marks above <code>2.6px</code> take a specular at <code>(−0.34r, −0.38r)</code>. Stubs
+  render at <code>0.45 α</code>.</div>
+</section>
+
+<!-- ============================ PLATES ============================ -->
+<section id="plates">
+  <h2>Instrument plates</h2>
+  <p>Plates are <strong>not glass</strong>. Glass — gradient body, specular top rim, soft cast shadow
+  — was built and discarded. The chamfer is the world's signature and applies to every plate.</p>
+
+  <div class="spec">
+    <div class="plate">
+      <div class="corner"></div>
+      <h4>Wants you</h4>
+      <div class="row"><span>Enactus — brief</span></div>
+      <div class="path" style="margin-top:3px">ATLAS/diagnostic-v2.md</div>
+    </div>
+    <div class="plate" style="width:168px">
+      <div class="corner" style="left:auto;right:-1px;border-left:0;border-right:1px solid var(--tick)"></div>
+      <h4>Gather</h4>
+      <div class="row"><span>6 marked</span><span class="path">→ SESSION</span></div>
+    </div>
+    <div class="plate" style="width:150px">
+      <div class="corner"></div>
+      <h4>Empty</h4>
+      <div class="row"><span style="color:var(--ink-idle)">Nothing marked</span></div>
+    </div>
+  </div>
+
+  <table>
+    <tbody>
+      <tr><td class="m">Fill</td><td>matte <code>--plate</code>. No gradient, no backdrop blur, no inner glow</td></tr>
+      <tr><td class="m">Edge</td><td>1px <code>--plate-edge</code>, uniform on all sides</td></tr>
+      <tr><td class="m">Corners</td><td>cut, not rounded — top-right and bottom-left chamfered 11px</td></tr>
+      <tr><td class="m">Corner tick</td><td>7px two-sided square in <code>--tick</code>, opposite the anchor edge</td></tr>
+      <tr><td class="m">Header</td><td>mono, .16em, uppercase, 1px rule beneath</td></tr>
+      <tr><td class="m">Radius</td><td><strong>0 everywhere.</strong> The chamfer carries the softening</td></tr>
+    </tbody>
+  </table>
+  <div class="rule">Plates are <strong>movable and their positions persist</strong> — that is the
+  two-layer pin. A plate is never docked to a fixed slot.</div>
+</section>
+
+<!-- ============================ CONSOLE HUB ============================ -->
+<section id="console-hub">
+  <h2>The Console Hub</h2>
+  <p class="lede">A named full-screen surface for Consoles — shells in a pty, not agents. The
+  canvas, cards, Wires, and Rail belong inside that surface; they are not its definition.</p>
+
+  <h3>Surface before canvas</h3>
+  <div class="spec tight">
+    <div class="plate" style="width:210px"><div class="corner"></div><h4>Console Hub</h4><div class="row"><span>4 consoles</span><span class="path">ENTER →</span></div></div>
+    <div class="plate" style="width:250px"><div class="corner"></div><h4>Hub · Console</h4><div class="row"><span>ConsoleView</span><span class="st-run">▮▮▮▮ RUN</span></div><div class="path" style="margin-top:3px">a movable plate, not an overlay</div></div>
+    <div class="plate" style="width:250px"><div class="corner"></div><h4>Hub · Question fan</h4><div class="row"><span>ask → comparison</span><span class="path">PLATE</span></div><div class="path" style="margin-top:3px">the phase-one plate, relocated intact</div></div>
+  </div>
+  <div class="rule"><strong>The door plate is the entry.</strong> The Hub surface exists before its
+  free canvas. <code>ConsoleView</code> becomes a movable Console plate on that surface, and the
+  question fan graduates onto it without becoming a canvas card or a fixed overlay.</div>
+  <div class="rule">A fan slot is an <strong>answerer</strong>, not a coding agent under a temporary
+  restraint: its read-only boundary comes from absent write tools, it may have a workspace or none,
+  and it never reads the user's personal instruction file.</div>
+
+  <h3>One active run</h3>
+  <div class="spec block"><div class="hub-runtime">
+    <div class="hub-recipes"><b>WAYS TO WORK</b><span>EXPLORE</span><span class="active">SYNTHESIZE</span><span>DEBATE</span><span>COORDINATE</span><span>VALIDATE</span><span>DIRECT</span><span>CONSOLE</span></div>
+    <div class="hub-run"><h4>Synthesize</h4><p>Independent proposals, then one fresh attributed merge in an isolated worktree.</p><div class="hub-flow"><span>PROPOSE</span><span class="active">HOLD</span><span>MERGE</span><span>SYNC</span></div><div class="hub-streams"><div class="hub-stream"><b>◇ NORTH</b><em>AGY · HIGH</em><span class="live">▮▮▮▮ RUN</span><br>812 OUTPUT · 38.4 T/S</div><div class="hub-stream"><b>▲ FORGE</b><em>CODEX · XHIGH</em><span class="live">▮▮▮▮ RUN</span><br>1,104 OUTPUT · 51.2 T/S</div><div class="hub-stream"><b>◆ LENS</b><em>CLAUDE · HIGH</em>▮▮▮▮ DONE<br>934 OUTPUT · 44.8 T/S</div></div></div>
+    <div class="hub-stack"><b>LIVE STACK</b><div>◆ LENS<span>ORCHESTRATOR · HIGH</span></div><div>▲ FORGE<span>PRIMARY · XHIGH</span></div><div>◇ NORTH<span>CONTRIBUTOR · HIGH</span></div></div>
+  </div></div>
+  <div class="rule"><strong>The active run is the Hub's visual peak.</strong> The Workspace Explorer
+  occupies the top of the leading sidebar. Its lower <code>WAYS TO WORK</code> section holds all seven
+  Recipes in their fixed order and selects one causal plate rather than turning the screen into a
+  dashboard. The Stack is durable configuration at the trailing edge. Slot identity is glyph, label,
+  position, and the bounded agent rim.</div>
+  <div class="rule">The recipe makes its guarantee visible in the stage strip: separate answers for
+  Explore, a held release before Synthesize writes, dependency work for Coordinate, and gate-first
+  work for Validate. Streams show only observed telemetry; unavailable data stays unavailable.</div>
+  <div class="rule"><strong>Agent rims identify vendors, never outcomes.</strong> Codex is blue,
+  Claude is orange, and AGY carries a rainbow 2px rim. Running, done, failed, held, queued, and
+  wants-you continue to read through glyph and label, whether or not a user can distinguish colour.</div>
+
+  <h3>Five console states</h3>
+  <div class="spec"><div class="console-states">
+    <div class="console-state"><b>▮▮▮▮ RUN 2m14</b><span>full ink · shell marked command start</span></div>
+    <div class="console-state done"><b>▮▮▮▮ DONE 41s</b><span>dimmed ink · exit code 0</span></div>
+    <div class="console-state fail"><b>▯▮▯▮ EXIT 1</b><span>broken glyph · non-zero exit</span></div>
+    <div class="console-state"><b class="st-call">CALL</b><span>agent hook · arrives once and holds</span></div>
+    <div class="console-state idle"><b>▯▯▯▯ IDLE</b><span>idle ink · sitting at prompt</span></div>
+  </div></div>
+  <div class="rule">Running and Done share a filled glyph because both represent command work; label
+  and ink level separate them. Failed alone breaks the glyph, so state never depends on tone alone.</div>
+
+  <h3>Wire legs</h3>
+  <div class="spec"><div class="hub-wires">
+    <div class="hub-wire"><svg viewBox="0 0 260 78" aria-label="Out leg specimen"><path d="M16 45 C76 45 138 24 228 24" fill="none" stroke="var(--ink)" stroke-width="1.2"/><path d="M220 20 L236 24 L220 28 Z" fill="var(--ink)"/><text x="124" y="16" text-anchor="middle" fill="var(--ink)" font-family="var(--mono)" font-size="9">docs/briefs/console-hub.md</text></svg><p>OUT LEG · solid 1.2px · filled triangle · label above · upper lane −18px</p></div>
+    <div class="hub-wire"><svg viewBox="0 0 260 78" aria-label="Return leg specimen"><path d="M16 32 C76 32 138 54 228 54" fill="none" stroke="var(--ink-dim)" stroke-width="1" stroke-dasharray="7 5"/><path d="M220 50 L236 54 L220 58" fill="none" stroke="var(--ink-dim)" stroke-width="1.2"/><text x="124" y="73" text-anchor="middle" fill="var(--ink-dim)" font-family="var(--mono)" font-size="9">/codex-review docs/briefs/console-hub.md</text></svg><p>RETURN LEG · broken 7 5 stroke · open chevron · label below · lower lane +18px</p></div>
+  </div></div>
+  <div class="rule">The broken stroke is on-family with Fragment's deliberately broken geometry.
+  The legs are not mirror images: an out leg carries a brief path; a return leg carries a review command.</div>
+
+  <h3>Loop</h3>
+  <div class="spec block"><svg class="hub-loop" viewBox="0 0 620 128" aria-label="Loop specimen"><path d="M66 56 C190 20 430 20 554 56" fill="none" stroke="var(--ink)" stroke-width="1.2"/><path d="M546 52 L562 56 L546 60 Z" fill="var(--ink)"/><path d="M554 82 C430 108 190 108 66 82" fill="none" stroke="var(--ink-dim)" stroke-width="1" stroke-dasharray="7 5"/><path d="M74 78 L58 82 L74 86" fill="none" stroke="var(--ink-dim)" stroke-width="1.2"/><path d="M270 42 h-7 v48 h7 M350 42 h7 v48 h-7" fill="none" stroke="var(--ink-idle)" stroke-width="1"/><text x="310" y="28" text-anchor="middle" fill="var(--ink)" font-family="var(--mono)" font-size="10">LOOP · ROUND 2 / 5</text></svg></div>
+  <div class="rule">Two opposed Wires between the same pair derive one Loop: two lanes, 1px braces,
+  and a badge. Detach either leg and the survivor becomes a plain Wire. The cap is five fix rounds,
+  with one free round only when the acceptance gate itself is repaired.</div>
+
+  <h3>Canvas, card sizes and focus</h3>
+  <div class="spec"><div class="hub-cards"><div class="hub-card strip"><b>CODEX B</b>RUN 2m14</div><div class="hub-card card"><b>CLAUDE A</b>~/Files/Cockpit · claude<br><br>Wrote the brief. Ready for handoff.</div><div class="hub-card focus"><b>FOCUS · CONSOLE</b>Focus owns the keyboard.<br><br>Esc → canvas<br>Release focus</div></div></div>
+  <div class="rule">Strip stays running, wired, and on the Rail; card is the canvas default; focus fills
+  the surface and dims the canvas. <code>Esc</code> releases focus to canvas first, then leaves the
+  Hub. The focus bar states keyboard ownership and provides an explicit release control.</div>
+</section>
+
+<!-- ============================ CONTROLS ============================ -->
+<section id="controls">
+  <h2>Controls</h2>
+  <p>The controller is <strong>achromatic</strong>. Colour is pinned to the corpus, and a controller
+  is chrome, so the active state is a full inversion rather than an accent hue. These are live —
+  drag them.</p>
+
+  <div class="spec">
+    <div>
+      <div class="cap">Segmented · active is inversion</div>
+      <div class="seg" id="segDemo">
+        <button aria-pressed="true">Force</button><button aria-pressed="false">Circle</button>
+        <button aria-pressed="false">Hex</button><button aria-pressed="false">Rings</button>
+      </div>
+    </div>
+    <div>
+      <div class="lab">Slider <em id="sV">0.59</em></div>
+      <input type="range" id="sDemo" min="0" max="1.6" step="0.01" value="0.59">
+    </div>
+    <label class="chk"><input type="checkbox" id="cDemo"> File names</label>
+    <div style="display:flex;gap:6px"><button class="btn">Expand all</button><button class="btn solid">Bake</button></div>
+    <button class="tuneBtn">Tune</button>
+  </div>
+
+  <div class="rule ban"><strong>Every control moves real nodes.</strong> There are no painted
+  controls in this design. A control that does nothing is a lie the rest of the product would have
+  to keep.</div>
+  <div class="rule">Settings persist to config. A folder move must not be a code change, and that
+  applies to appearance too.</div>
+</section>
+
+<!-- ============================ ICONS ============================ -->
+<section id="icons">
+  <h2>Icons</h2>
+  <p>The <strong>Fragment family</strong>, chosen against five alternates. Authored SVG only — no
+  icon library, no unicode glyphs, no emoji. 14px viewBox, <code>stroke-width 1.4</code>, angular
+  with cut corners, the same chamfer language as the plates.</p>
+  <div class="spec"><div class="icons" id="iconGrid"></div></div>
+  <div class="rule ban">Any new icon is drawn into this family by hand. Reaching for Lucide or
+  Heroicons for "just one missing icon" is the specific failure this rule exists to prevent.</div>
+</section>
+
+<!-- ============================ LAYOUTS ============================ -->
+<section id="layouts">
+  <h2>Layer 0 layouts</h2>
+  <p class="lede">A 3D rest state and four flat layouts. Every node carries all five coordinate sets
+  and interpolates between them — nothing is spawned or destroyed at any boundary, which is what
+  makes every transition continuity rather than a cut.</p>
+  <div class="spec"><div class="layouts" id="layGrid"></div></div>
+  <div class="rule"><strong>Circle is the one layout that ranks the corpus</strong> rather than just
+  arranging it, and it ranks it into exactly two bands. <strong>Skills is the inner ring</strong>,
+  because it is what the OS actually runs on — the vault types skills as <code>reference</code>,
+  "a procedure consulted and followed — operative". Everything else shares one outer ring, divided
+  into contiguous arcs sized by count so each cluster keeps its identity and its label. Seven
+  separate rings were built first and diluted the claim into a gradient; two rings state it.</div>
+</section>
+
+<!-- ============================ VAULT SENTINEL ============================ -->
+<section id="sentinel">
+  <h2>Vault sentinel</h2>
+  <p class="lede">The one object at the true centre of layer 0 that is not a file. It is the
+  destination everything links to, not a body of files, so it should read as a mechanism and not a
+  population.</p>
+
+  <div class="spec"><canvas id="gimbalSpec" width="440" height="260" style="width:220px;height:130px"></canvas></div>
+
+  <p>A <strong>gimbal</strong>: three chamfered rings on three independent axes, foreshortened by the
+  same three noise streams that drive the rest-state tumble, with bearing pins where each ring meets
+  its axis and a solid chamfered core. Chosen against an <em>iris</em> of concentric segment rings
+  (too close to the cluster family — risked reading as the biggest cluster) and a static
+  <em>keystone</em> block (the calmest read, but least related to the corpus it sits inside).</p>
+
+  <div class="rule ban"><strong>There is no warm mark in the shell.</strong> The gimbal replaces an
+  earlier orange hexagon — the one exception the achromatic-shell rule used to carry. That exception
+  is spent.</div>
+
+  <div class="rule"><strong>It never recedes.</strong> Pressing a cluster anchor dims every other
+  cluster toward the Neighborhood, the way the legend already mutes clusters — but the sentinel holds
+  full weight and turns its face, a hard triangular pointer, toward whichever anchor is pressed. It is
+  where the work ends up, so it is the one thing that does not fade. <strong>Not yet built</strong> —
+  recorded ahead of it.</div>
+</section>
+
+<!-- ============================ CLUSTER ANCHORS ============================ -->
+<section id="anchors">
+  <h2>Cluster anchors</h2>
+  <p class="lede">The seven cluster anchors in the Explorer are painted in the field, not a DOM
+  element layered over the canvas. A CSS <code>clip-path</code> octagon was tried first and read as a
+  flat image, with none of the world's depth, light or noise.</p>
+
+  <div class="spec"><div id="anchorSpec" style="display:flex;gap:26px;align-items:flex-end"></div></div>
+
+  <p>A shell is six segments on a ring, each an annular quad separated by a gap and sliding on its own
+  value-noise stream by about ±3.5%, around a chamfered square nucleus. Limbs leave the shell toward
+  its real link directions — straight, with one elbow and a terminal tick, routed rather than grown.
+  Segment count is fixed at six; only the shell radius reads file count, so an 8-file cluster and a
+  3699-file cluster are the same object at different scale. Below about 5px the segments merge into a
+  solid chamfered hexagon — the same honest collapse the corpus marks make below 1.6px.</p>
+
+  <div class="rule ban"><strong>Rigid, not organic.</strong> A noise-deformed membrane version was
+  built first and rejected: it read as biology, and this world is machined. Life comes from
+  articulation — joints flex, segments slide on their tracks, the body yaws — never from deformation,
+  and never from a pulse.</div>
+
+  <div class="rule">Pressing one collapses it inward over roughly 620ms: the shell contracts and its
+  limbs retract, its member nodes pull in, the aperture opens to take them, and the Neighborhood
+  resolves from the shell's own position. Reverse runs faster (~440ms) — it regroups faster than it
+  released.</div>
+</section>
+
+<!-- ============================ MOTION ============================ -->
+<section id="motion">
+  <h2>Motion</h2>
+  <p class="lede">Binding, and the difference between a live organism and a screensaver. Everything is
+  driven by value noise over a 512-entry table. Both traces below show 40 seconds of real signal.</p>
+
+  <div class="spec block">
+    <div class="motion">
+      <figure>
+        <canvas id="mNoise" width="620" height="176"></canvas>
+        <figcaption><b>Value noise — used.</b> 40s of signal. Signed, centred on zero: drifts, stalls, reverses. No section of it repeats another.</figcaption>
+      </figure>
+      <figure class="bad">
+        <canvas id="mSine" width="620" height="176"></canvas>
+        <figcaption><b>Summed sines — forbidden.</b> The same 40s, with the period marked. Built, then removed: a sum of sines is still periodic, and the eye learns it.</figcaption>
+      </figure>
+    </div>
+  </div>
+
+  <table>
+    <thead><tr><th>Channel</th><th>Drive</th><th>Rule</th></tr></thead>
+    <tbody>
+      <tr><td class="m">Particle swim</td><td class="m">3 streams per node</td><td><strong>This is the life.</strong> Every particle wanders in X, Y and Z at its own tempo, so the volume is never still and never moves as one body</td></tr>
+      <tr><td class="m">Tumble</td><td class="m">3 signed streams, X/Y/Z</td><td>Independent, so they never re-align and no orientation recurs. <strong>A single-axis constant spin is explicitly wrong</strong></td></tr>
+      <tr><td class="m">Wander</td><td class="m">signed, scaled by spin</td><td>Flat layouts drift, stall and reverse</td></tr>
+    </tbody>
+  </table>
+
+  <div class="rule ban"><strong>Removed deliberately: global breath, cluster pulse, alpha twinkle.</strong>
+  All three were built and all three are gone. A radius that swells and clusters that beat read as
+  <em>one organism flexing</em>; the corpus is not one organism, it is 583 things. Blinking is
+  pulsing by another name. Life here is displacement, not brightness.</div>
+  <div class="rule">Under <code>prefers-reduced-motion</code> all three channels stop dead. The field
+  is completely still and fully legible.</div>
+</section>
+
+<!-- ============================ INPUT ============================ -->
+<section id="input">
+  <h2>Input</h2>
+  <p>The volume is a <code>role="button"</code> that is also a trackball. Both gestures live on one
+  surface, so the disambiguation is part of the spec rather than an implementation detail.</p>
+  <table>
+    <tbody>
+      <tr><td class="m">Drag</td><td>Rotates X and Y at <code>0.0062 rad/px</code>. Pointer events, so touch and pen work</td></tr>
+      <tr><td class="m">Release</td><td>Throws it — velocity carries, decaying at <code>0.9955^dt</code></td></tr>
+      <tr><td class="m">Grab</td><td><strong>The hand wins.</strong> Tumble gain drops to 0, easing back over 2.4s. The volume never fights your grip and never freezes permanently</td></tr>
+      <tr><td class="m">Arrow keys</td><td><code>0.09 rad</code> per press, so the gesture is not mouse-only</td></tr>
+      <tr><td class="m">&lt; 5px travel</td><td>A click, which opens the explorer. Above it the drag consumed the gesture</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================ REFUSED ============================ -->
+<section id="refused">
+  <h2>Refused</h2>
+  <p class="lede">Each of these was genuinely built and then removed. They are recorded so a later
+  pass does not re-offer them as fresh ideas, or read their absence as an oversight.</p>
+  <table>
+    <thead><tr><th>Refused</th><th>Why it went</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Opaque glass</strong></td><td>Gradient bodies, specular rims, soft cast shadows. Replaced by matte plates with chamfered corners</td></tr>
+      <tr><td><strong>The agentic-OS panel grid</strong></td><td>The category standard, taken once and overturned. The corpus is the ground now, not content inside a widget</td></tr>
+      <tr><td><strong>Ember accent light</strong></td><td>Drawn beside the monotone version and rejected by direct comparison. The reference governs form and depth, not hue</td></tr>
+      <tr><td><strong>Global breath</strong></td><td>Reads as one organism flexing. The corpus is 583 things</td></tr>
+      <tr><td><strong>Cluster pulse</strong></td><td>Same reason. A beat implies a single body</td></tr>
+      <tr><td><strong>Alpha twinkle</strong></td><td>Blinking is pulsing by another name. Life is displacement, not brightness</td></tr>
+      <tr><td><strong>Summed sines</strong></td><td>Still periodic. The eye learns the loop</td></tr>
+      <tr><td><strong>Colour-coded state</strong></td><td>Would make the product require colour vision. State is glyph form first</td></tr>
+      <tr><td><strong>Coloured status dots</strong></td><td>Violates the rule that colour never carries state</td></tr>
+      <tr><td><strong>Gateway “swappable brain”</strong></td><td>An active gateway credential replaces the Claude subscription and bills per token; it is not a harmless model switch</td></tr>
+      <tr><td><strong>Any icon library</strong></td><td>One authored family, one stroke weight, drawn by hand</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================ OWED ============================ -->
+<section id="owed">
+  <h2>Owed &amp; unwritten</h2>
+
+  <div class="owed">
+    <h3>The field of fragments — owed</h3>
+    <p>The world is named <em>the fragment field</em>, and the mono debris that named it is currently
+    absent: it was in the first pass and did not survive the layer 0 rework. It returns in the final
+    design as the <strong>background ground</strong>. This is a commitment, not an idea.</p>
+    <p>One question to settle first: the design already assigns meaning by position, so a third
+    population needs its own honest referent or it becomes wallpaper. The standing answer is
+    <strong>unindexed working matter</strong> — repo trees and vendored dependencies, the 115,215
+    files under Studybuddy's <code>FrontEnd</code>.</p>
+  </div>
+
+  <div class="owed" style="margin-top:14px">
+    <h3>The light theme — open</h3>
+    <p>Both themes are first-class and designed, not inverted. The light theme is <strong>not yet
+    designed</strong>, and a naive inversion of a black field with a lit volume will not work. It is
+    a design task, not a token flip.</p>
+  </div>
+
+  <div class="owed" style="margin-top:14px">
+    <h3>Console state extension — decided</h3>
+    <p>The five-state Console vocabulary is now decided: Running, Done, Failed, Wants you, and Idle.
+    State remains glyph-plus-label first; the light theme remains open.</p>
+  </div>
+
+  <div class="owed" style="margin-top:14px">
+    <h3>Extract findings</h3>
+    <p><strong>Consolidated in documentation:</strong> the Hub reuses <code>--ink</code>,
+    <code>--ink-dim</code>, <code>--ink-idle</code>, <code>--plate</code>, <code>--plate-edge</code>,
+    <code>--tick</code>, <code>--chamfer</code>, <code>--mono</code>, and <code>--disp</code>.
+    <strong>Left deliberately duplicated:</strong> Hub wire geometry, Loop braces, and card-size
+    specimens are surface-specific and do not yet recur three times with the same intent. No new
+    runtime token or wrapper is warranted.</p>
+  </div>
+
+  <h3>Not covered, because undesigned</h3>
+  <table>
+    <tbody>
+      <tr><td>Terminal panel typography, and how xterm's own theme reconciles with these tokens</td></tr>
+      <tr><td>Empty states, first run, and a missing or unreadable vault path</td></tr>
+      <tr><td>Error and permission states</td></tr>
+      <tr><td>The Learning and Projects custom panels, which PRODUCT.md says earn an exception</td></tr>
+    </tbody>
+  </table>
+  <div class="rule">These are unwritten because they are undesigned, not because they are
+  unimportant. Do not invent them from this page's tone; design them, then write them down.</div>
+</section>
+
+<footer>
+  Source of truth: <code>DESIGN.md</code> · <code>PRODUCT.md</code> owns product truth and wins any conflict<br>
+  Reference implementation: <code>docs/mockups/2026-08-27-cockpit-secondbrain.html</code><br>
+  Written from the locked direction before the build — every value is a decision, not a measurement, until the finish review confirms it.
+</footer>
+
+</main>
+</div>
+
+<script>
+(function(){
+  var TAU=Math.PI*2;
+  var CLUSTERS=[
+    {n:'ATLAS · notes',    c:'#C9A2F0', k:117},
+    {n:'Skills',           c:'#F0871F', k:111},
+    {n:'Docs',             c:'#E86FD0', k: 93},
+    {n:'The Brewery',      c:'#5AA9F0', k: 82},
+    {n:'Sessions',         c:'#3FD0C8', k: 76},
+    {n:'Meta · standards', c:'#F0D24A', k: 58},
+    {n:'Inbox',            c:'#7BE38C', k: 46}
+  ];
+  var TOKENS=[
+    ['--ground','#000000','The field. True black'],
+    ['--page','#0A0A0B','Chrome outside the field'],
+    ['--plate','rgba(6,6,7,.86)','Plate fill, matte'],
+    ['--plate-edge','rgba(237,237,234,.22)','Plate hairline, 1px'],
+    ['--tick','rgba(237,237,234,.5)','Corner tick'],
+    ['--ink','#EDEDEA','Primary text'],
+    ['--ink-dim','#8E8E88','Labels, paths, data'],
+    ['--ink-idle','#5A5A55','Stalled or inactive'],
+    ['--rule','#2A2A2C','Dividers in chrome']
+  ];
+  var TYPES=[
+    {t:'resource',  shape:'ring',    fill:false, trust:'captured from outside — quotable, not endorsed'},
+    {t:'reference', shape:'square',  fill:true,  trust:'a procedure consulted and followed — operative'},
+    {t:'concept',   shape:'diamond', fill:true,  trust:"Ryan's own claim"},
+    {t:'session',   shape:'hex',     fill:false, trust:'a bounded effort'},
+    {t:'moc',       shape:'moc',     fill:true,  trust:'entry point to a topic'},
+    {t:'off-vocabulary', shape:'cross', fill:false, trust:'outside the standard — a violation the health check flags'}
+  ];
+
+  var seed=20260827;
+  function rnd(){ seed=(seed*1664525+1013904223)>>>0; return seed/4294967296; }
+  var NT=[]; for(var i=0;i<512;i++) NT.push(rnd());
+  function vn(x){ var i=Math.floor(x),f=x-i,a=NT[((i%512)+512)%512],b=NT[(((i+1)%512)+512)%512];
+    var u=f*f*(3-2*f); return a+(b-a)*u; }
+  function vns(x){ return vn(x)-0.5; }
+  function hexA(h,a){ return 'rgba('+parseInt(h.slice(1,3),16)+','+parseInt(h.slice(3,5),16)+','+parseInt(h.slice(5,7),16)+','+a+')'; }
+
+  /* a chamfered regular polygon, drawn into whatever g is at the moment — shared by
+     the gimbal and the segmented shell, same as the product's own paint.ts */
+  function chamferPath(R,sides,rot,cut,sq){
+    sq=(sq==null)?1:sq;
+    var pts=[];
+    for(var i=0;i<sides;i++){ var a=rot+i/sides*TAU; pts.push([Math.cos(a)*R,Math.sin(a)*R*sq]); }
+    g.beginPath();
+    for(var i=0;i<sides;i++){
+      var p=pts[i], nx=pts[(i+1)%sides], pv=pts[(i-1+sides)%sides];
+      var A=[p[0]+(pv[0]-p[0])*cut,p[1]+(pv[1]-p[1])*cut];
+      var B=[p[0]+(nx[0]-p[0])*cut,p[1]+(nx[1]-p[1])*cut];
+      i?g.lineTo(A[0],A[1]):g.moveTo(A[0],A[1]);
+      g.lineTo(B[0],B[1]);
+    }
+    g.closePath();
+  }
+
+  /* ---- the product's own mark renderer, verbatim ---- */
+  var g=null;
+  function drawMark(x,y,r,col,ti,alpha){
+    var T=TYPES[ti];
+    if(r<1.6){ g.globalAlpha=alpha; g.fillStyle=col;
+      g.beginPath(); g.arc(x,y,r,0,TAU); g.fill(); return; }
+    g.save(); g.globalCompositeOperation='lighter'; g.globalAlpha=alpha*0.30;
+    var bg=g.createRadialGradient(x,y,0,x,y,r*3.4);
+    bg.addColorStop(0,col); bg.addColorStop(1,'rgba(0,0,0,0)');
+    g.fillStyle=bg; g.beginPath(); g.arc(x,y,r*3.4,0,TAU); g.fill();
+    g.restore();
+    g.globalAlpha=alpha; g.fillStyle=col; g.strokeStyle=col;
+    g.lineWidth=Math.max(0.7,r*0.42);
+    switch(T.shape){
+      case 'diamond': g.beginPath(); g.moveTo(x,y-r*1.35); g.lineTo(x+r*1.35,y);
+        g.lineTo(x,y+r*1.35); g.lineTo(x-r*1.35,y); g.closePath(); g.fill(); break;
+      case 'square': g.fillRect(x-r*0.98,y-r*0.98,r*1.96,r*1.96); break;
+      case 'ring': g.beginPath(); g.arc(x,y,r*0.98,0,TAU); g.stroke(); break;
+      case 'hex': g.beginPath();
+        for(var k=0;k<6;k++){ var a=k/6*TAU+0.52;
+          k?g.lineTo(x+Math.cos(a)*r*1.25,y+Math.sin(a)*r*1.25)
+           :g.moveTo(x+Math.cos(a)*r*1.25,y+Math.sin(a)*r*1.25); }
+        g.closePath(); g.stroke(); break;
+      case 'moc': g.beginPath(); g.arc(x,y,r*0.52,0,TAU); g.fill();
+        g.globalAlpha=alpha*0.75; g.lineWidth=Math.max(0.6,r*0.26);
+        g.beginPath(); g.arc(x,y,r*1.55,0,TAU); g.stroke(); break;
+      case 'cross': g.lineWidth=Math.max(0.7,r*0.34); var c=r*1.05;
+        g.beginPath(); g.moveTo(x-c,y-c); g.lineTo(x+c,y+c);
+        g.moveTo(x+c,y-c); g.lineTo(x-c,y+c); g.stroke(); break;
+    }
+    if(T.fill && r>2.6){
+      g.globalAlpha=alpha*0.55; g.fillStyle='#FFFFFF';
+      g.beginPath(); g.arc(x-r*0.34,y-r*0.38,r*0.24,0,TAU); g.fill();
+    }
+  }
+  function markURL(ti,px,r){
+    var c=document.createElement('canvas'); c.width=px*2; c.height=px*2;
+    var kg=c.getContext('2d'); kg.scale(2,2);
+    var save=g; g=kg; drawMark(px/2,px/2,r,'#EDEDEA',ti,1); g=save;
+    return c.toDataURL();
+  }
+
+  /* ---- swatches ---- */
+  document.getElementById('swatches').innerHTML=CLUSTERS.map(function(c){
+    return '<div class="sw"><span class="chip" style="background:'+c.c+'"></span>'
+      +'<div class="meta"><b>'+c.n+'</b><span>'+c.c+' · '+c.k+' files</span></div></div>';
+  }).join('');
+  document.getElementById('toks').innerHTML=TOKENS.map(function(t){
+    return '<div class="tok"><i style="background:'+t[1]+'"></i><div><b>'+t[0]+'</b>'
+      +'<span>'+t[1]+'</span></div></div>';
+  }).join('');
+
+  /* ---- mark grid ---- */
+  document.getElementById('markGrid').innerHTML=TYPES.map(function(T,i){
+    return '<div class="mk"><div class="top"><img alt="" src="'+markURL(i,30,7)+'"><b>'+T.t+'</b></div>'
+      +'<p>'+T.trust+'</p>'
+      +'<div class="fillnote">'+(T.fill?'filled · claimed':'hollow · not claimed')+'</div></div>';
+  }).join('');
+
+  /* ---- size ramp ---- */
+  (function(){
+    var c=document.getElementById('sizeRamp'); g=c.getContext('2d'); g.scale(2,2);
+    var W=800,H=75;
+    g.clearRect(0,0,W,H);
+    var sizes=[1.0,1.4,1.6,2.2,3.0,4.2,5.8,8.0];
+    sizes.forEach(function(r,i){
+      var x=44+i*(W-88)/(sizes.length-1);
+      drawMark(x,34,r,'#C9A2F0',0,1);
+      g.globalAlpha=1; g.fillStyle='#5A5A55';
+      g.font='9px "Cascadia Mono",monospace'; g.textAlign='center';
+      g.fillText(r.toFixed(1)+'px',x,66);
+      if(r<1.6){ g.fillStyle='#4E4E4A'; g.fillText('dot',x,14); }
+    });
+  })();
+
+  /* ---- icons: the Fragment family ---- */
+  var ICONS=[
+    ['Projects','<path d="M1.5 4.5 L5 1.5 L12.5 1.5 L12.5 10 L9 12.5 L1.5 12.5 Z"/><path d="M5 1.5 L5 5 L1.5 4.5"/>'],
+    ['Learning','<path d="M2 11 L2 3.5 L7 2 L12 3.5 L12 11"/><path d="M7 2 L7 11"/><path d="M2 11 L12 11"/>'],
+    ['Knowledge','<path d="M7 1.8 L12.2 5 L10.2 11.5 L3.8 11.5 L1.8 5 Z"/><path d="M7 1.8 L7 7"/><path d="M1.8 5 L10.2 11.5"/>'],
+    ['Launch','<path d="M2.5 11.5 L11.5 2.5"/><path d="M6.5 2.5 L11.5 2.5 L11.5 7.5"/><path d="M2.5 6 L2.5 2.5 L6 2.5"/>'],
+    ['Gather','<path d="M1.8 2 L5.6 6.4 L1.8 6.4"/><path d="M12.2 2 L8.4 6.4 L12.2 6.4"/><path d="M7 6.4 L7 12.2"/><path d="M4.6 9.8 L7 12.2 L9.4 9.8"/>'],
+    ['Terminal','<path d="M1.5 2.5 L12.5 2.5 L12.5 10.5 L4 10.5 L1.5 8 Z"/><path d="M4 5.5 L6.2 7 L4 8.5"/><path d="M7.6 8.6 L10.4 8.6"/>'],
+    ['Search','<path d="M2 6.2 L6.2 2 L10.4 6.2 L6.2 10.4 Z"/><path d="M9.4 9.4 L12.4 12.4"/>'],
+    ['Wants you','<path d="M7 1.6 L12.6 11.4 L1.4 11.4 Z"/><path d="M7 5.4 L7 8.2"/><path d="M7 9.9 L7 10"/>'],
+    ['Wire','<path d="M1.5 9.8 L5.2 6.1 L9.1 6.1 L12.5 2.7"/><path d="M9.4 2.7 L12.5 2.7 L12.5 5.8"/>'],
+    ['Loop','<path d="M2 5.1 C4 1.8 10 1.8 12 5.1"/><path d="M9.2 3.7 L12 5.1 L10.5 7.7"/><path d="M12 8.9 C10 12.2 4 12.2 2 8.9"/><path d="M4.8 10.3 L2 8.9 L3.5 6.3"/>'],
+    ['Minimize','<path d="M1.8 3.2 L4.4 1.8 L12.2 1.8 L12.2 9.6 L9.6 12.2 L1.8 12.2 Z"/><path d="M4.2 8.3 L9.8 8.3"/>'],
+    ['Expand','<path d="M5.2 1.8 L1.8 1.8 L1.8 5.2"/><path d="M1.8 1.8 L5.2 5.2"/><path d="M8.8 12.2 L12.2 12.2 L12.2 8.8"/><path d="M12.2 12.2 L8.8 8.8"/>'],
+    ['Release','<path d="M2 4.1 L5.2 1.8 L12.2 1.8 L12.2 9.7 L9.7 12.2 L2 12.2 Z"/><path d="M8.8 5.1 L5.2 8.7"/><path d="M5.2 8.7 L5.2 5.9"/><path d="M5.2 8.7 L8 8.7"/>']
+  ];
+  document.getElementById('iconGrid').innerHTML=ICONS.map(function(ic){
+    return '<div class="ico"><svg viewBox="0 0 14 14" fill="none" stroke="#EDEDEA" stroke-width="1.4"'
+      +' stroke-linecap="round" stroke-linejoin="round">'+ic[1]+'</svg><span>'+ic[0]+'</span></div>';
+  }).join('');
+
+  /* ---- layout thumbnails, drawn with the product's own geometry ---- */
+  var SKILLS_CI=1, OUTER_ORDER=[5,0,4,2,3,6];
+  var R_SKILLS=0.46, R_OUTER=1.00, ARC_GAP=0.05;
+  var FC=[[-0.46,-0.10,0.30],[0.44,-0.30,0.27],[-0.05,-0.34,0.22],
+          [0.20,0.26,0.20],[-0.20,0.30,0.18],[0.46,0.20,0.17],[-0.50,0.32,0.15]];
+  var HC=[[-0.52,-0.16],[0.40,-0.34],[-0.04,-0.36],[0.26,0.24],[-0.24,0.30],[0.52,0.14],[-0.54,0.34]];
+  var nodes=[];
+  CLUSTERS.forEach(function(cl,ci){
+    var a0=ci/7*TAU+0.055, a1=(ci+1)/7*TAU-0.055, ROWS=7, placed=0, rowW=[], tot=0;
+    for(var r=0;r<ROWS;r++){ var w=0.55+r*0.30; rowW.push(w); tot+=w; }
+    var hexCells=[[0,0]], ring=1;
+    while(hexCells.length<cl.k){
+      var q=ring,s2=-ring,dirs=[[-1,1],[-1,0],[0,-1],[1,-1],[1,0],[0,1]];
+      for(var d=0;d<6&&hexCells.length<cl.k+6;d++)
+        for(var st=0;st<ring;st++){ hexCells.push([q,s2]); q+=dirs[d][0]; s2+=dirs[d][1]; }
+      ring++;
+    }
+    for(var r=0;r<ROWS;r++){
+      var n=(r===ROWS-1)?(cl.k-placed):Math.round(cl.k*rowW[r]/tot); if(n<0)n=0;
+      for(var i=0;i<n;i++){
+        var idx=placed+i, t=(n===1)?0.5:i/(n-1), fc=FC[ci];
+        var fa=rnd()*TAU, fr=Math.sqrt(rnd())*fc[2], hc=hexCells[idx]||[0,0];
+        var u=rnd()*2-1, ph=rnd()*TAU, sr=Math.sqrt(Math.max(0,1-u*u));
+        var gr=Math.PI*(3-Math.sqrt(5));
+        var yv=1-(ci+0.5)/7*2, rad=Math.sqrt(Math.max(0,1-yv*yv)), th=gr*ci;
+        var D=[Math.cos(th)*rad,yv,Math.sin(th)*rad], w=0.62;
+        var vx=sr*Math.cos(ph)*(1-w)+D[0]*w, vy=u*(1-w)+D[1]*w, vz=sr*Math.sin(ph)*(1-w)+D[2]*w;
+        var L=Math.hypot(vx,vy,vz)||1, br=Math.pow(rnd(),1.7)*0.86;
+        nodes.push({ci:ci,c:cl.c,ty:(rnd()<0.67?0:(rnd()<0.5?1:2)),idx:idx,
+          ra:a0+(a1-a0)*t, rr:0.335+(r/(ROWS-1))*0.315,
+          cring:0, ca:0,
+          fx:fc[0]+Math.cos(fa)*fr, fy:fc[1]+Math.sin(fa)*fr*0.92,
+          hx:HC[ci][0]+(hc[0]+hc[1]/2)*0.0295, hy:HC[ci][1]+hc[1]*0.0295*0.866,
+          bx:vx/L*br, by:vy/L*br, bz:vz/L*br,
+          s:0.9+Math.pow(rnd(),2.2)*1.5});
+      }
+      placed+=n;
+    }
+  });
+
+  /* circle: Skills inner ring, everyone else sharing one outer ring in arcs */
+  (function(){
+    var outerTotal=0; OUTER_ORDER.forEach(function(ci){ outerTotal+=CLUSTERS[ci].k; });
+    var usable=TAU-OUTER_ORDER.length*ARC_GAP, cursor=-Math.PI/2+ARC_GAP/2, span={};
+    OUTER_ORDER.forEach(function(ci){
+      var w=CLUSTERS[ci].k/outerTotal*usable;
+      span[ci]={a0:cursor,a1:cursor+w}; cursor+=w+ARC_GAP;
+    });
+    nodes.forEach(function(nd){
+      var k=CLUSTERS[nd.ci].k;
+      if(nd.ci===SKILLS_CI){ nd.cring=R_SKILLS; nd.ca=(nd.idx/k)*TAU; }
+      else{ var sp=span[nd.ci]; nd.cring=R_OUTER;
+        nd.ca=sp.a0+((k===1)?0.5:nd.idx/(k-1))*(sp.a1-sp.a0); }
+    });
+  })();
+
+  var LAYOUTS=[
+    ['ball','Ball','rest state · 3D'],
+    ['force','Force','what the links say'],
+    ['circle','Circle','two rings · Skills inside'],
+    ['hex','Hex','packed cluster plates'],
+    ['rings','Rings','arc bands per cluster']
+  ];
+  document.getElementById('layGrid').innerHTML=LAYOUTS.map(function(L){
+    return '<div class="lay"><canvas data-l="'+L[0]+'" width="440" height="440"></canvas>'
+      +'<div class="n">'+L[1]+' <em>· '+L[2]+'</em></div></div>';
+  }).join('');
+
+  [].forEach.call(document.querySelectorAll('.lay canvas'),function(cv){
+    var which=cv.dataset.l;
+    g=cv.getContext('2d'); g.scale(2,2);
+    var W=220,H=220,cx=W/2,cy=H/2,R=W*0.40;
+    g.clearRect(0,0,W,H);
+    if(which==='ball'){
+      /* the cage, at rest only */
+      var PHI=(1+Math.sqrt(5))/2, CV=[];
+      [[-1,PHI,0],[1,PHI,0],[-1,-PHI,0],[1,-PHI,0],[0,-1,PHI],[0,1,PHI],
+       [0,-1,-PHI],[0,1,-PHI],[PHI,0,-1],[PHI,0,1],[-PHI,0,-1],[-PHI,0,1]]
+      .forEach(function(v){ var L2=Math.hypot(v[0],v[1],v[2]); CV.push([v[0]/L2,v[1]/L2,v[2]/L2]); });
+      g.strokeStyle='#EDEDEA'; g.lineWidth=1;
+      for(var a=0;a<CV.length;a++) for(var b=a+1;b<CV.length;b++){
+        var d=Math.hypot(CV[a][0]-CV[b][0],CV[a][1]-CV[b][1],CV[a][2]-CV[b][2]);
+        if(d>=1.16) continue;
+        var pa=proj(CV[a]), pb=proj(CV[b]);
+        g.globalAlpha=0.10; g.beginPath(); g.moveTo(pa[0],pa[1]); g.lineTo(pb[0],pb[1]); g.stroke();
+      }
+    }
+    function proj(v){
+      var rx=0.42, ry=0.7;
+      var y1=v[1]*Math.cos(rx)-v[2]*Math.sin(rx), z1=v[1]*Math.sin(rx)+v[2]*Math.cos(rx);
+      var x2=v[0]*Math.cos(ry)+z1*Math.sin(ry), z2=-v[0]*Math.sin(ry)+z1*Math.cos(ry);
+      var per=1.95/(1.95+z2);
+      return [cx+x2*R*1.30*per, cy+y1*R*1.30*per, per];
+    }
+    var pts=nodes.map(function(nd){
+      if(which==='ball'){ var q=proj([nd.bx,nd.by,nd.bz]); return {x:q[0],y:q[1],z:q[2],per:q[2],n:nd}; }
+      if(which==='rings') return {x:cx+Math.cos(nd.ra)*nd.rr*R,y:cy+Math.sin(nd.ra)*nd.rr*R,z:0,per:1,n:nd};
+      if(which==='circle')return {x:cx+Math.cos(nd.ca)*nd.cring*R,y:cy+Math.sin(nd.ca)*nd.cring*R,z:0,per:1,n:nd};
+      if(which==='force') return {x:cx+nd.fx*R*1.15,y:cy+nd.fy*R*1.15,z:0,per:1,n:nd};
+      return {x:cx+nd.hx*R*1.15,y:cy+nd.hy*R*1.15,z:0,per:1,n:nd};
+    });
+    if(which==='ball') pts.sort(function(a,b){ return b.z-a.z; });
+    pts.forEach(function(p){
+      var dep=which==='ball'?Math.max(0,Math.min(1,(p.per-0.70)/0.58)):1;
+      var al=which==='ball'?(0.38+dep*0.62):0.92;
+      drawMark(p.x,p.y,p.n.s*0.62*(which==='ball'?p.per:1),p.n.c,p.n.ty,al);
+    });
+    g.globalAlpha=1;
+    /* the Vault sentinel — achromatic, not the retired orange hexagon */
+    g.save(); g.translate(cx,cy);
+    chamferPath(6,6,0.52,0.16);
+    g.fillStyle='#0A0A0B'; g.fill();
+    g.strokeStyle='#EDEDEA'; g.lineWidth=1.2; g.stroke();
+    g.restore();
+  });
+
+  /* ---- Vault sentinel specimen: the gimbal, static pose ---- */
+  (function(){
+    var c=document.getElementById('gimbalSpec'); g=c.getContext('2d'); g.scale(2,2);
+    var W=220,H=130,cx=W/2,cy=H/2,R=42;
+    g.clearRect(0,0,W,H);
+    var tilts=[0.22,0.34,-0.18];
+    for(var i=0;i<3;i++){
+      var sq=Math.max(0.12,Math.abs(Math.cos(tilts[i]*1.2)));
+      g.save(); g.translate(cx,cy); g.rotate(i*1.05);
+      var rr=R*(1-i*0.13);
+      chamferPath(rr,6,i*0.4,0.10,sq);
+      g.strokeStyle=hexA('#EDEDEA',0.85-i*0.14); g.lineWidth=1.4-i*0.25; g.stroke();
+      [0,Math.PI].forEach(function(pa){
+        g.fillStyle=hexA('#EDEDEA',0.9);
+        g.fillRect(Math.cos(pa)*rr-2.5,Math.sin(pa)*rr*sq-2.5,5,5);
+      });
+      g.restore();
+    }
+    g.save(); g.translate(cx,cy);
+    chamferPath(R*0.30,6,0,0.16);
+    g.fillStyle=hexA('#EDEDEA',0.98); g.fill();
+    g.strokeStyle=hexA('#EDEDEA',0.4); g.lineWidth=1;
+    g.beginPath(); g.arc(0,0,R*0.44,0,TAU); g.stroke();
+    g.restore();
+    g.fillStyle='#5A5A55'; g.font='9px "Cascadia Mono",monospace'; g.textAlign='center';
+    g.fillText('VAULT · 583 INDEXED',cx,cy+R+20);
+  })();
+
+  /* ---- Cluster anchor specimen: the segmented shell, at three sizes ---- */
+  (function(){
+    var examples=[
+      {label:'Full · 40px',      r:40, hue:'#C9A2F0'},
+      {label:'Small · 16px',     r:16, hue:'#5AA9F0'},
+      {label:'Collapsed · 4px',  r:4,  hue:'#F0871F'}
+    ];
+    var host=document.getElementById('anchorSpec');
+    examples.forEach(function(ex){
+      var wrap=document.createElement('div');
+      var cv=document.createElement('canvas'); cv.width=160; cv.height=160;
+      cv.style.width='80px'; cv.style.height='80px'; cv.style.display='block';
+      wrap.appendChild(cv);
+      var cap=document.createElement('div');
+      cap.style.cssText='font-family:var(--mono);font-size:9px;color:var(--ink-idle);text-align:center;margin-top:6px';
+      cap.textContent=ex.label;
+      wrap.appendChild(cap);
+      host.appendChild(wrap);
+      var save=g; g=cv.getContext('2d'); g.scale(2,2);
+      g.save(); g.translate(40,40);
+      if(ex.r<5){
+        chamferPath(ex.r,6,0,0.16);
+        g.fillStyle=ex.hue; g.fill();
+      } else {
+        var SEG=6, gap=0.16;
+        for(var i=0;i<SEG;i++){
+          var a0=i/SEG*TAU+gap/2, a1=(i+1)/SEG*TAU-gap/2;
+          g.beginPath();
+          g.moveTo(Math.cos(a0)*ex.r,Math.sin(a0)*ex.r);
+          g.lineTo(Math.cos(a1)*ex.r,Math.sin(a1)*ex.r);
+          g.lineTo(Math.cos(a1)*ex.r*0.74,Math.sin(a1)*ex.r*0.74);
+          g.lineTo(Math.cos(a0)*ex.r*0.74,Math.sin(a0)*ex.r*0.74);
+          g.closePath();
+          g.fillStyle=hexA(ex.hue,0.62); g.fill();
+          g.strokeStyle=hexA(ex.hue,0.95); g.lineWidth=1; g.stroke();
+        }
+        chamferPath(ex.r*0.40,4,Math.PI/4,0.18);
+        g.fillStyle=hexA(ex.hue,0.98); g.fill();
+      }
+      g.restore();
+      g=save;
+    });
+  })();
+
+  /* ---- live motion traces: noise vs the forbidden sine sum ---- */
+  /* Traces are drawn once, over a long window. Static beats animated here: with
+     ~40s of signal on screen you can SEE the sine sum repeat and the noise not,
+     which is the whole claim. An animated trace only implies it, and an
+     always-running rAF on a documentation page is cost with no argument. */
+  function trace(id,fn,col,mark){
+    var cv=document.getElementById(id), ctx=cv.getContext('2d');
+    var W=cv.width, H=cv.height, SPAN=40;
+    ctx.clearRect(0,0,W,H);
+    ctx.strokeStyle='rgba(237,237,234,.10)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(0,H/2); ctx.lineTo(W,H/2); ctx.stroke();
+    ctx.strokeStyle=col; ctx.lineWidth=2; ctx.lineJoin='round';
+    ctx.beginPath();
+    for(var x=0;x<=W;x+=2){
+      var y=H/2 - fn(x/W*SPAN)*H*0.36;
+      x?ctx.lineTo(x,y):ctx.moveTo(x,y);
+    }
+    ctx.stroke();
+    /* on the forbidden trace, mark the period so the repeat is not a claim but a measurement */
+    if(mark){
+      var per=TAU/1.5;                      /* the slower of the two components */
+      ctx.setLineDash([3,4]); ctx.strokeStyle='rgba(237,237,234,.30)'; ctx.lineWidth=1;
+      for(var t=per;t<SPAN;t+=per){
+        var px=t/SPAN*W;
+        ctx.beginPath(); ctx.moveTo(px,12); ctx.lineTo(px,H-12); ctx.stroke();
+      }
+      ctx.setLineDash([]);
+      ctx.fillStyle='rgba(237,237,234,.45)';
+      ctx.font='10px "Cascadia Mono",monospace';
+      ctx.fillText('period', 6, 16);
+    }
+  }
+  trace('mNoise',function(t){ return vns(t*0.62)*1.7 + vns(t*1.9+41)*0.55; },'#EDEDEA',false);
+  trace('mSine', function(t){ return Math.sin(t*1.5)*0.62 + Math.sin(t*3.0+1.3)*0.34; },'#6E6E68',true);
+
+  /* Smooth scrolling belongs to the nav links, not to every scroll on the page.
+     As a global html rule it animates programmatic scrolls too and they queue. */
+  document.querySelectorAll('nav a[href^="#"]').forEach(function(a){
+    a.addEventListener('click',function(e){
+      var t=document.getElementById(a.getAttribute('href').slice(1));
+      if(!t) return;
+      e.preventDefault();
+      var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+      t.scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'});
+      history.replaceState(null,'',a.getAttribute('href'));
+    });
+  });
+
+  /* ---- live control demos ---- */
+  var segDemo=document.getElementById('segDemo');
+  segDemo.addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(!b) return;
+    [].forEach.call(segDemo.querySelectorAll('button'),function(x){
+      x.setAttribute('aria-pressed',String(x===b)); });
+  });
+  var sD=document.getElementById('sDemo'), sV=document.getElementById('sV');
+  sD.addEventListener('input',function(){ sV.textContent=parseFloat(sD.value).toFixed(2); });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,148 @@
+/*
+ * The Console Recipe's grid: terminals laid out the way the fan's worker cards
+ * are (WorkerCard.module.css), so the two surfaces read as one family even
+ * though a card here is a real shell rather than a slot stream.
+ */
+.setup {
+  margin-bottom: 8px;
+  color: var(--ink);
+  font: 10px var(--font-data);
+}
+
+.setup summary {
+  width: fit-content;
+  padding: 9px 12px;
+  border: 1px solid var(--rule);
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.setupBody {
+  display: grid;
+  gap: 10px;
+  margin-top: 8px;
+  padding: 16px;
+  background: var(--plate);
+  border: 1px solid var(--rule);
+  clip-path: var(--chamfer);
+}
+
+.setupBody input {
+  min-width: 0;
+  padding: 8px;
+  color: var(--ink);
+  background: var(--page);
+  border: 1px solid var(--rule);
+  border-radius: 0;
+  font: inherit;
+}
+
+.setupBody p {
+  margin: 0;
+  color: var(--dim);
+  line-height: 1.6;
+}
+
+.launchers {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+  font: 10px var(--font-data);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink);
+}
+
+.launchers button {
+  padding: 8px 14px;
+  font: inherit;
+  text-transform: inherit;
+  color: var(--ink);
+  background: var(--plate);
+  border: 1px solid var(--rule);
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.launchers button:hover:not(:disabled) {
+  color: var(--page);
+  background: var(--ink);
+}
+
+.launchers button:disabled {
+  color: var(--dim);
+  cursor: default;
+}
+
+.launchers button:focus-visible,
+.setup summary:focus-visible,
+.setupBody input:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+
+.count {
+  margin-left: auto;
+  color: var(--dim);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 8px;
+}
+
+.fleetRow {
+  display: grid;
+  grid-template-columns: minmax(90px, .7fr) minmax(120px, 1.6fr) minmax(100px, 1fr) auto;
+  gap: 8px;
+}
+
+.fleetRow button {
+  padding: 6px 10px;
+  border: 1px solid var(--rule);
+  background: var(--page);
+  color: var(--ink);
+  font: inherit;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.fleetRow button:disabled { color: var(--dim); cursor: default; }
+.fleetRow button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+.workersHead {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 0 10px;
+  border-top: 1px solid var(--rule);
+  color: var(--dim);
+  font: 9px var(--font-data);
+  text-transform: uppercase;
+  letter-spacing: .1em;
+}
+
+.card::before { content: ''; display: block; height: 2px; }
+.card.codex::before { background: var(--agent-codex); }
+.card.claude::before { background: var(--agent-claude); }
+.card.agy::before { background: linear-gradient(90deg, var(--agent-agy)); }
+.card.codex { background: color-mix(in srgb, var(--agent-codex) 7%, var(--plate)); }
+.card.claude { background: color-mix(in srgb, var(--agent-claude) 7%, var(--plate)); }
+.card.agy { background: color-mix(in srgb, #C9A2F0 7%, var(--plate)); }
+
+@media (max-width: 1200px) {
+  .fleetRow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+.card {
+  min-width: 0;
+  min-height: 0;
+  height: clamp(280px, 46vh, 420px);
+  background: var(--plate);
+  border: 1px solid var(--rule);
+  clip-path: var(--chamfer);
+}

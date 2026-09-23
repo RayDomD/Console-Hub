@@ -1,0 +1,214 @@
+/*
+ * The Orchestrator terminal, from the approved mockup
+ * (docs/mockups/2026-09-02-orchestrator-terminal.html): full width, one head,
+ * a scrolling transcript of bounded height, one prompt-line composer.
+ *
+ * It is terminal-styled, not a terminal: there is no xterm, no shell and no
+ * command line behind it (ADR 0049). Nor is it a chat surface - no bubbles, no
+ * avatars, no alternating alignment. Speaker, time and glyph carry the turn.
+ */
+.terminal {
+  border: 1px solid var(--rule);
+  background: var(--plate);
+  clip-path: var(--chamfer);
+}
+
+/* The 2px top rim is the Orchestrator's vendor, per ADR 0048: identity, never
+   status. It does not change while a reply runs, fails or lands. */
+.vendorCap { height: 2px; width: 100%; }
+.codex { background: var(--agent-codex); }
+.claude { background: var(--agent-claude); }
+.agy { background: linear-gradient(90deg, var(--agent-agy)); }
+
+.card_codex { background: color-mix(in srgb, var(--agent-codex) 7%, var(--plate)); }
+.card_claude { background: color-mix(in srgb, var(--agent-claude) 7%, var(--plate)); }
+.card_agy { background: color-mix(in srgb, #C9A2F0 7%, var(--plate)); }
+
+.identity_codex { border-left: 2px solid var(--agent-codex); padding-left: 5px; }
+.identity_claude { border-left: 2px solid var(--agent-claude); padding-left: 5px; }
+.identity_agy { border-left: 2px solid #C9A2F0; padding-left: 5px; }
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 9px 11px;
+  border-bottom: 1px solid var(--rule);
+  color: var(--ink-muted);
+  font: 8px var(--font-data);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.head h2 {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: .04em;
+}
+
+.identity { color: var(--ink-secondary); }
+.settings { position: relative; }
+.settings summary { padding: 4px 6px; border: 1px solid var(--rule); cursor: pointer; }
+.settings summary:hover, .settings summary:focus-visible { color: var(--ink); border-color: var(--ink); outline: 0; }
+.settings > div { position: absolute; z-index: 2; top: calc(100% + 5px); right: 0; display: flex; gap: 4px; padding: 6px; background: var(--page); border: 1px solid var(--rule); }
+.settings :global(select) { min-width: 76px; }
+
+/* The pane is resizable, so the head and the composer wrap rather than clip: a
+   control pushed off the right edge is a control the user cannot reach. */
+.spacer { flex: 1 1 0; min-width: 0; }
+
+.headButton, .send {
+  padding: 5px 8px;
+  color: var(--ink-secondary);
+  background: transparent;
+  border: 1px solid var(--rule);
+  font: 8px var(--font-data);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.headButton:hover:enabled, .send:hover:enabled { color: var(--ink); border-color: var(--ink); }
+.headButton:disabled, .send:disabled { color: var(--ink-muted); cursor: not-allowed; }
+
+/*
+ * Bounded height, scrolling in place. The worker row has to stay reachable
+ * directly beneath the terminal, so a transcript that grew with the run would
+ * push the answers off the surface exactly when they start arriving.
+ */
+.body {
+  min-height: 140px;
+  max-height: 306px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 12px;
+  color: var(--ink-secondary);
+  font: 9px/1.55 var(--font-data);
+  scrollbar-color: var(--ink-muted) transparent;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+}
+
+.body::-webkit-scrollbar { width: 10px; }
+.body::-webkit-scrollbar-track { background: transparent; }
+.body::-webkit-scrollbar-thumb {
+  background: var(--ink-muted);
+  border: 3px solid var(--plate);
+  background-clip: padding-box;
+}
+.body::-webkit-scrollbar-thumb:hover { background: var(--ink); }
+
+.empty { margin: 0; color: var(--ink-muted); }
+
+.entry { margin-bottom: 12px; }
+.entry:last-child { margin-bottom: 0; }
+
+.stamp {
+  margin-bottom: 3px;
+  color: var(--ink-muted);
+  font-size: 7px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.line { margin: 0; color: var(--ink); white-space: pre-wrap; overflow-wrap: break-word; }
+.line .marker { color: var(--ink-muted); }
+.assistant { color: var(--ink-secondary); }
+
+/* Partial text is diagnostic until the turn lands, so it reads as quieter than
+   an answer rather than the same as one. */
+.pending { color: var(--ink-muted); }
+.failure { margin: 4px 0 0; color: var(--ink-muted); font-size: 8px; }
+
+/* A snapshot is a photograph of a run, ruled off from the conversation around
+   it so an answer built on it cannot be mistaken for the run's own voice. */
+.snapshot {
+  margin-top: 6px;
+  padding: 6px 9px;
+  border-left: 2px solid var(--ink-muted);
+  background: var(--page);
+  color: var(--ink-secondary);
+}
+
+.snapshotLine { margin: 0; white-space: pre-wrap; overflow-wrap: break-word; }
+
+.delegation { margin-top: 6px; border: 1px solid var(--rule); }
+
+.delegationTitle {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--rule);
+  color: var(--ink);
+  font-size: 7px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.assignment {
+  display: grid;
+  grid-template-columns: 65px minmax(0, 1fr);
+  gap: 9px;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.assignment:last-child { border-bottom: 0; }
+.assignment dt { color: var(--ink-muted); text-transform: uppercase; }
+.assignment dd { margin: 0; color: var(--ink-secondary); }
+
+.degraded { padding: 6px 8px; color: var(--ink-muted); }
+
+.synthesisPath { margin: 4px 0 0; color: var(--ink-muted); font-size: 7px; }
+
+.compose {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 9px;
+  padding: 9px 11px;
+  border-top: 1px solid var(--rule);
+}
+
+.prompt { color: var(--ink-muted); font: 9px var(--font-data); }
+
+.input {
+  flex: 1 1 12ch;
+  min-width: 0;
+  padding: 0;
+  color: var(--ink);
+  background: transparent;
+  border: 0;
+  font: 9px/1.5 var(--font-data);
+  resize: none;
+}
+
+.input:focus-visible { outline: 1px solid var(--ink); outline-offset: 3px; }
+.input::placeholder { color: var(--ink-muted); }
+.input:disabled { color: var(--ink-muted); }
+
+/* The one filled control here. Proposing a delegation is what spends. */
+.propose {
+  padding: 5px 9px;
+  color: var(--page);
+  background: var(--ink);
+  border: 1px solid var(--ink);
+  font: 8px var(--font-data);
+  font-weight: 750;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  clip-path: var(--chamfer);
+}
+
+.propose:disabled { color: var(--ink-muted); background: transparent; border-color: var(--rule); cursor: not-allowed; }
+
+.note {
+  margin: 0;
+  padding: 6px 14px 8px 14px;
+  border-top: 1px solid var(--rule);
+  color: var(--ink-muted);
+  font: 8px var(--font-data);
+}

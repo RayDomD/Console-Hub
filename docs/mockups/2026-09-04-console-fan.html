@@ -1,0 +1,191 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Console — full Hub mockup</title>
+<style>
+  :root {
+    --page: #0A0A0B; --ink: #EDEDEA; --ink-secondary: #B7B7B2; --ink-muted: #6E6E70;
+    --rule: #1C1C1E; --hair: #2C2C2E; --plate: #131315;
+    --agent-claude: #D97757; --agent-codex: #6BA6E8; --agent-agy: #C9A2F0;
+    --ok: #7FBF8F;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; background: var(--page); color: var(--ink);
+    font-family: "Cascadia Mono", ui-monospace, Consolas, monospace;
+    font-size: 13px;
+  }
+  .caption-bar { padding: 10px 16px; background: #050506; border-bottom: 1px solid var(--hair); font-family: system-ui, sans-serif; color: var(--ink-secondary); font-size: 12px; line-height: 1.5; }
+  .caption-bar b { color: var(--ink); }
+  .caption-bar code { color: var(--agent-codex); }
+
+  .hub {
+    display: grid;
+    grid-template-columns: 220px auto minmax(0,1fr) auto 260px;
+    height: calc(100vh - 54px);
+    min-height: 0;
+  }
+  .handle { width: 5px; background: var(--rule); }
+
+  /* navigator */
+  .navigator { padding: 14px 12px; }
+  .nav-frame { border: 1px solid var(--hair); height: 100%; display: flex; flex-direction: column; }
+  .nav-head { padding: 9px 10px; border-bottom: 1px solid var(--rule); font-size: 8px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-muted); }
+  .route-list { display: grid; gap: 4px; padding: 9px; }
+  .route { padding: 7px 8px; border: 1px solid var(--rule); border-left: 3px solid transparent; font-size: 9px; letter-spacing: .04em; color: var(--ink-secondary); display: flex; justify-content: space-between; }
+  .route i { color: var(--ink-muted); font-size: 7px; font-style: normal; text-transform: uppercase; }
+  .route.active { color: var(--ink); background: color-mix(in srgb, var(--ink) 8%, transparent); border-color: color-mix(in srgb, var(--ink) 30%, transparent); border-left-color: var(--ink); font-weight: 750; }
+
+  /* stage */
+  .stage { min-width: 0; overflow: auto; padding: 16px; }
+  .stage-inner { max-width: 1200px; }
+
+  .term { border: 1px solid var(--rule); background: var(--plate); }
+  .rim { height: 2px; background: var(--agent-claude); }
+  .term-head { display: flex; align-items: center; gap: 12px; padding: 9px 11px; border-bottom: 1px solid var(--rule); font-size: 8px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-muted); }
+  .term-head h3 { margin: 0; font-family: system-ui, sans-serif; font-size: 11px; font-weight: 750; color: var(--ink); text-transform: none; letter-spacing: 0; }
+  .term-head .id { color: var(--ink-secondary); }
+  .term-head .spacer { flex: 1; }
+  .term-body { padding: 12px; font-size: 12px; line-height: 1.6; color: var(--ink-secondary); }
+  .stamp { color: var(--ink-muted); font-size: 10px; margin: 10px 0 3px; }
+  .stamp:first-child { margin-top: 0; }
+  .line { margin: 0; color: var(--ink); white-space: pre-wrap; }
+  .plan-title { color: var(--ink); font-weight: 750; }
+  .plan-slot { color: var(--agent-codex); }
+  .dep { color: var(--ink-muted); }
+
+  .compose { display: flex; align-items: center; gap: 9px; padding: 9px 11px; border-top: 1px solid var(--rule); }
+  .prompt { color: var(--ink-muted); }
+  .input { flex: 1; color: var(--ink-muted); font-style: italic; }
+  .hint { padding: 5px 9px; border: 1px dashed var(--rule); color: var(--ink-muted); font-size: 9px; letter-spacing: .04em; }
+  .hold-note { display: flex; align-items: center; gap: 8px; padding: 6px 14px 9px; color: var(--ink-muted); font-size: 8px; letter-spacing: .05em; text-transform: uppercase; }
+  .hold-note code { font-family: inherit; color: var(--agent-codex); background: color-mix(in srgb, var(--agent-codex) 12%, transparent); padding: 1px 5px; text-transform: none; letter-spacing: 0; }
+
+  .workers-head { display: flex; align-items: center; gap: 10px; margin: 18px 0 10px; color: var(--ink-muted); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; }
+
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .card { border: 1px solid var(--rule); background: var(--plate); display: flex; flex-direction: column; min-height: 260px; }
+  .card-rim { height: 2px; }
+  .card.claude .card-rim { background: var(--agent-claude); }
+  .card.codex .card-rim { background: var(--agent-codex); }
+  .card.agy .card-rim { background: var(--agent-agy); }
+  .card-name { display: flex; align-items: center; gap: 7px; padding: 8px 9px 6px; }
+  .card-name b { font-size: 11px; letter-spacing: .06em; }
+  .card-name .launch { margin-left: auto; color: var(--ink-muted); font-size: 9px; }
+  .card-status { padding: 0 9px 7px; color: var(--ink-muted); font-size: 9px; letter-spacing: .06em; text-transform: uppercase; }
+  .card-status.done { color: var(--ok); }
+  .card-status.waiting { color: var(--ink-muted); }
+  .card-screen { flex: 1; padding: 8px 9px; font-size: 10.5px; line-height: 1.65; color: var(--ink-secondary); border-top: 1px solid var(--rule); }
+  .card-screen .typed { color: var(--ink); }
+  .card-screen .sentinel { color: var(--ink-muted); font-style: italic; }
+  .card-footer { padding: 5px 9px; border-top: 1px solid var(--rule); color: var(--ink-muted); font-size: 9px; }
+  .ghost { border: 1px dashed var(--rule); display: flex; align-items: center; justify-content: center; min-height: 260px; color: var(--ink-muted); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
+
+  /* aside */
+  .aside { padding: 16px 14px; }
+  .aside-head { display: flex; justify-content: space-between; color: var(--ink-muted); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 10px; }
+  .aside-empty { border: 1px dashed var(--rule); padding: 16px 12px; color: var(--ink-muted); font-size: 10px; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<div class="caption-bar">Full Hub, Console Recipe selected. <b>Live Stack aside is empty</b> for this Recipe — terminals
+aren't Stack slots. Grid shows the mid-run state: T2 already reported done via its real hook, T1 still running,
+T3 held on both. See ADR 0050 and ADR 0051 for the decisions this draws.</div>
+
+<div class="hub">
+  <div class="navigator">
+    <div class="nav-frame">
+      <div class="nav-head">Console Navigator</div>
+      <div class="route-list">
+        <div class="route"><span>Explore</span><i>read only</i></div>
+        <div class="route"><span>Synthesize</span><i>one writer</i></div>
+        <div class="route"><span>Debate</span><i>read only</i></div>
+        <div class="route"><span>Coordinate</span><i>worktrees</i></div>
+        <div class="route"><span>Validate</span><i>gate first</i></div>
+        <div class="route"><span>Direct</span><i>one session</i></div>
+        <div class="route active"><span>Console</span><i>terminals</i></div>
+      </div>
+    </div>
+  </div>
+  <div class="handle"></div>
+
+  <div class="stage">
+    <div class="stage-inner">
+      <div class="term">
+        <div class="rim"></div>
+        <div class="term-head">
+          <h3>Orchestrator</h3>
+          <span class="id">CLAUDE · SONNET · MEDIUM</span>
+          <span class="spacer"></span>
+          <span>▯▯▯▯ READY</span>
+        </div>
+        <div class="term-body">
+          <div class="stamp">You · 01:33</div>
+          <p class="line">&gt; research gemini 3.8 vs 3.7, then write a combined summary</p>
+          <div class="stamp">Orchestrator · 01:34</div>
+          <p class="line">&lt; <span class="plan-title">Delegation Plan: Gemini 3.8 vs 3.7 Research</span>
+
+<span class="plan-slot">T1</span> — claude — Gemini 3.8 deep dive → writes <span class="dep">docs/briefs/t1-output.md</span>
+<span class="plan-slot">T2</span> — codex — Gemini 3.7 baseline + comparison table → writes <span class="dep">docs/briefs/t2-output.md</span>
+<span class="plan-slot">T3</span> — agy — <span class="dep">waits on T1, T2</span> — reads both files, writes the combined summary</p>
+        </div>
+        <div class="compose">
+          <span class="prompt">&gt;</span>
+          <span class="input">Ask the Orchestrator, or reply "go" to release this plan…</span>
+          <span class="hint">SEND</span>
+        </div>
+        <div class="hold-note">Released · reply anytime, or <code>./goal</code> to plan and release in one turn</div>
+      </div>
+
+      <div class="workers-head">TERMINALS · 3 · RELEASED · T3 WAITING ON T1</div>
+
+      <div class="grid">
+        <div class="card claude">
+          <div class="card-rim"></div>
+          <div class="card-name"><b>T1</b><span class="launch">claude</span></div>
+          <div class="card-status">▮▮▮▮ running</div>
+          <div class="card-screen">$ claude
+&gt; <span class="typed">research gemini 3.8 deep dive, write to docs/briefs/t1-output.md</span>
+Reading blog.google…▮</div>
+          <div class="card-footer">git-bash · C:\FIles\Cockpit</div>
+        </div>
+        <div class="card codex">
+          <div class="card-rim"></div>
+          <div class="card-name"><b>T2</b><span class="launch">codex</span></div>
+          <div class="card-status done">● done · reported via notify hook</div>
+          <div class="card-screen">$ codex
+&gt; <span class="typed">gemini 3.7 baseline + comparison table, write to docs/briefs/t2-output.md</span>
+Wrote docs/briefs/t2-output.md
+&gt; <span class="typed">_</span></div>
+          <div class="card-footer">git-bash · C:\FIles\Cockpit</div>
+        </div>
+        <div class="card agy">
+          <div class="card-rim"></div>
+          <div class="card-name"><b>T3</b><span class="launch">agy</span></div>
+          <div class="card-status waiting">▯▯▯▯ held — waiting on T1</div>
+          <div class="card-screen">$ agy
+▮ not yet released — reads T1+T2's files once both signal done</div>
+          <div class="card-footer">git-bash · C:\FIles\Cockpit</div>
+        </div>
+      </div>
+
+      <div class="workers-head" style="margin-top:20px;">+ ADD TERMINAL · UP TO 6</div>
+      <div class="grid">
+        <div class="ghost">+ add terminal</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="handle"></div>
+  <div class="aside">
+    <div class="aside-head"><span>LIVE STACK</span></div>
+    <div class="aside-empty">No Stack slots to show. Console Recipe terminals aren't Stack slots — they're
+    listed in the grid, not here.</div>
+  </div>
+</div>
+
+</body>
+</html>

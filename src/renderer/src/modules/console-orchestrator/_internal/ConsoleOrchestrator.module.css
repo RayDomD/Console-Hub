@@ -1,0 +1,195 @@
+/*
+ * The Console Recipe's Orchestrator, matching orchestrator-terminal's card
+ * language (full width, one head, a scrolling transcript, one prompt-line
+ * composer) so the two Recipes read as one family. No propose button and no
+ * lifecycle gate here - see the hold note instead.
+ */
+.terminal {
+  border: 1px solid var(--rule);
+  background: var(--plate);
+  clip-path: var(--chamfer);
+  margin-bottom: 9px;
+}
+
+.interactive { height: clamp(400px, 58vh, 720px); min-height: 400px; }
+.emptySession { padding: 24px 14px; color: var(--ink-muted); font: 11px/1.6 var(--font-data); }
+
+.rim { height: 2px; width: 100%; background: var(--agent-claude); }
+.codex .rim { background: var(--agent-codex); }
+.agy .rim { background: linear-gradient(90deg, var(--agent-agy)); }
+.claude { background: color-mix(in srgb, var(--agent-claude) 7%, var(--plate)); }
+.codex { background: color-mix(in srgb, var(--agent-codex) 7%, var(--plate)); }
+.agy { background: color-mix(in srgb, #C9A2F0 7%, var(--plate)); }
+.settings { padding: 8px 12px; font: 9px var(--font-data); border-bottom: 1px solid var(--rule); }
+.settings summary { cursor: pointer; color: var(--ink-secondary); }
+.settings > div { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.settings summary:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 9px 11px;
+  border-bottom: 1px solid var(--rule);
+  color: var(--ink-muted);
+  font: 8px var(--font-data);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.head h2 {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: .04em;
+}
+
+.identity { color: var(--ink-secondary); }
+.spacer { flex: 1 1 0; min-width: 0; }
+
+.headButton {
+  padding: 5px 8px;
+  color: var(--ink-secondary);
+  background: transparent;
+  border: 1px solid var(--rule);
+  font: 8px var(--font-data);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.headButton:hover:enabled { color: var(--ink); border-color: var(--ink); }
+
+.body {
+  min-height: 140px;
+  max-height: 306px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 12px;
+  color: var(--ink-secondary);
+  font: 9px/1.55 var(--font-data);
+  scrollbar-color: var(--ink-muted) transparent;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+}
+
+.empty { margin: 0; color: var(--ink-muted); }
+
+.entry { margin-bottom: 12px; }
+.entry:last-child { margin-bottom: 0; }
+
+.stamp {
+  margin-bottom: 3px;
+  color: var(--ink-muted);
+  font-size: 7px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.line { margin: 0; color: var(--ink); white-space: pre-wrap; overflow-wrap: break-word; }
+.line .marker { color: var(--ink-muted); }
+.assistant { color: var(--ink-secondary); }
+.pending { color: var(--ink-muted); }
+.failure { margin: 4px 0 0; color: var(--ink-muted); font-size: 8px; }
+
+.delegation { margin-top: 6px; border: 1px solid var(--rule); }
+
+.delegationTitle {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--rule);
+  color: var(--ink);
+  font-size: 7px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.assignment {
+  display: grid;
+  grid-template-columns: 90px minmax(0, 1fr);
+  gap: 9px;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--rule);
+}
+.assignment:last-child { border-bottom: 0; }
+.assignment dt { color: var(--ink-muted); text-transform: uppercase; }
+.assignment dt i { color: var(--agent-codex); font-style: normal; }
+.assignment dd { margin: 0; color: var(--ink-secondary); }
+
+.waiting { color: var(--ink-muted); }
+
+.markDone {
+  margin-left: 6px;
+  padding: 1px 5px;
+  color: var(--ink-muted);
+  background: transparent;
+  border: 1px solid var(--rule);
+  font: 7px var(--font-data);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.markDone:hover, .markDone:focus-visible { color: var(--ink); border-color: var(--ink); outline: 0; }
+
+.compose {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 9px;
+  padding: 9px 11px;
+  border-top: 1px solid var(--rule);
+}
+
+.prompt { color: var(--ink-muted); font: 9px var(--font-data); }
+
+.input {
+  flex: 1 1 12ch;
+  min-width: 0;
+  padding: 0;
+  color: var(--ink);
+  background: transparent;
+  border: 0;
+  font: 9px/1.5 var(--font-data);
+  resize: none;
+}
+.input:focus-visible { outline: 1px solid var(--ink); outline-offset: 3px; }
+.input::placeholder { color: var(--ink-muted); }
+.input:disabled { color: var(--ink-muted); }
+
+.send {
+  padding: 5px 8px;
+  color: var(--ink-secondary);
+  background: transparent;
+  border: 1px solid var(--rule);
+  font: 8px var(--font-data);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.send:hover:enabled { color: var(--ink); border-color: var(--ink); }
+.send:disabled { color: var(--ink-muted); cursor: not-allowed; }
+
+.plan { margin: 0 11px 11px; padding: 10px; border: 1px solid var(--rule); color: var(--ink-secondary); }
+.planTitle { margin: 0 0 8px; color: var(--ink); font: 8px var(--font-data); letter-spacing: .08em; text-transform: uppercase; }
+.plan pre { margin: 0 0 10px; max-height: 220px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font: 9px/1.5 var(--font-data); }
+
+.holdNote {
+  margin: 0;
+  padding: 6px 14px 9px;
+  color: var(--ink-muted);
+  font: 8px var(--font-data);
+  letter-spacing: .04em;
+}
+
+.refusal {
+  margin: 0;
+  padding: 6px 14px 9px;
+  color: var(--defect);
+  font: 8px var(--font-data);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .terminal, .headButton, .send { transition: none; animation: none; }
+}

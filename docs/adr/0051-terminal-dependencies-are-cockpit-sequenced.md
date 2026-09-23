@@ -1,0 +1,9 @@
+# Terminal dependencies are Cockpit-sequenced, not terminal-watched
+
+**Design reference:** [Console fan mockup](../mockups/2026-09-04-console-fan.html)
+
+When the Orchestrator's delegation plan for the Console Recipe ([ADR 0050](0050-console-becomes-an-orchestrated-terminal-fan.md)) states that one terminal depends on another (`T3 waits on T1, T2`), Cockpit holds the dependent terminal's task un-typed until every terminal it depends on reports done — nothing runs inside a terminal that watches another terminal itself. Handoff is a file path, not scrollback: the plan tells a producing terminal to write its output to a file under `docs/briefs/`, and the dependent's task references that path when it is finally typed in. This matches the wire's existing rule that a payload is a file, never scraped terminal output.
+
+"Done" is reported at two different strengths, and the difference is shown rather than hidden. **Claude** (`Stop` hook) and **Codex** (`notify`) self-report structurally — the signal is guaranteed by the CLI itself. **Agy and bare-shell terminals have no such mechanism**; the plan instead tells the agent to print an explicit sentinel line (e.g. `CONSOLE_DONE:T2`) as its last action, and Cockpit watches that terminal's raw output for the exact string. This is cooperative, not guaranteed — a forgotten or interrupted sentinel leaves the dependent waiting forever with no signal at all. Watching for implicit patterns (prompt shape, cursor position) was rejected as the same fragile heuristic the console-hub plan already ruled out for idle-detection; an explicit, exact sentinel is a deliberate exception because it is a stated instruction, not an inference. Any terminal can be marked "done" manually to unblock whatever depends on it, which is the only escape when a producer hangs or its signal never arrives.
+
+**Status:** accepted

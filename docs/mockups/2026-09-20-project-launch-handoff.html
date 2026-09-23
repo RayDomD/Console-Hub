@@ -1,0 +1,34 @@
+<h2>What changes when you click a project?</h2>
+<p class="subtitle">A flow comparison. The left side is the behavior pinned in PRODUCT.md. The right side is the proposed independent-app handoff.</p>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">Current product design · one Cockpit window</div>
+    <div class="mockup-body">
+      <div class="mock-nav">COCKPIT &nbsp; / &nbsp; Projects &nbsp; / &nbsp; StudyBuddy</div>
+      <div style="padding:18px 14px;display:grid;gap:12px">
+        <div style="border:1px solid #555;padding:13px"><strong>StudyBuddy</strong><br><small>Repo: C:\FIles\Studybuddy</small><br><button class="mock-button" style="margin-top:10px">Open project</button></div>
+        <div style="text-align:center;color:#aaa">↓ same window</div>
+        <div style="border:1px solid #777;padding:13px;background:#111;font-family:monospace;min-height:105px"><strong>Embedded terminal</strong><br><br>C:\FIles\Studybuddy&gt; claude<br>Claude ready for this project_</div>
+      </div>
+    </div>
+  </div>
+  <div class="mockup">
+    <div class="mockup-header">Proposed extraction · two independent windows</div>
+    <div class="mockup-body">
+      <div class="mock-nav">COCKPIT &nbsp; / &nbsp; Projects &nbsp; / &nbsp; StudyBuddy</div>
+      <div style="padding:18px 14px;display:grid;gap:12px">
+        <div style="border:1px solid #555;padding:13px"><strong>StudyBuddy</strong><br><small>Repo: C:\FIles\Studybuddy</small><br><button class="mock-button" style="margin-top:10px">Open in Console Hub</button></div>
+        <div style="text-align:center;color:#aaa">↓ launch or focus companion</div>
+        <div style="border:2px solid #aaa;padding:13px;background:#111;min-height:105px"><strong>CONSOLE HUB · separate app</strong><br><br>Workspace proposed: StudyBuddy<br><small>Unresolved Mission elsewhere: wait for Apply or Reject. Ordinary agent turns elsewhere keep running in their original terminals.</small><br><br>After acceptance: focus the most recently active session, or start the Hub-configured Vendor and model if none is open. If that choice is unavailable, show why and ask for another before opening a session.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:24px">
+  <div class="label">The actual tradeoff</div>
+  <p>The current design promises one click straight into Claude inside Cockpit. The agreed boundary keeps one-click agent startup, but moves the terminal and its lifetime into Console Hub's separate window. During extraction, its model-independent default is editable in Hub configuration. After standalone parity passes, Hub settings will let you type model IDs for supported Vendors and choose the default. Settings show each Vendor CLI's subscription sign-in status and open its own login flow; Hub does not store credentials. A paid or unknown CLI route holds a new agent Console with a clear reason; an existing session can still be focused. The same rule covers every Hub-started Recipe, Stack slot, Orchestrator turn, Skill, and Mission. Adding an ID does not grant account access. Settings will show separate Console and Mission availability. A model becomes a Mission choice only after you click Test Mission access and its small real request succeeds; the test uses only a verified included-subscription route. Paid and unknown Mission routes are disabled for now. Pi Mission login is separate from the Vendor CLI; Pi currently documents Claude Pro/Max use as per-token Extra Usage. The first standalone release shows the Mission account and verified billing route before Run plan, holding it if unknown or paid. This is a preflight, not a payment feature. Signing out or switching the Mission runner's account clears its successful checks, but keeps your model list. If access later fails, Hub preserves readable Mission progress and work and requires another successful test. Pick up starts a new worker in the saved worktree with the prior attempt as context; you may explicitly choose another Mission-verified model. Each attempt shows which model ran it. A replacement picked when the default is unavailable is one-time unless you explicitly save it. Changing the default affects future sessions; an open session keeps its model.</p>
+  <p><strong>Recipe gate:</strong> Before a Recipe starts, Hub checks every participating model slot. One paid or unknown route holds the whole Recipe and shows which slots need correction or removal. No slot starts while the Recipe is held. Hub checks again before each later model request; if a route changes, all new requests wait across the Recipe. Requests already sent may finish, and completed work stays readable. After fixing the route, you select Continue. Hub rechecks every participating slot before proceeding without repeating completed requests.</p>
+  <p><strong>Implementation check:</strong> Cockpit currently has an embedded Console Hub entry. The project-click-to-Claude behavior above is specified in PRODUCT.md; I did not find it implemented as a project click in the current renderer.</p>
+</div>

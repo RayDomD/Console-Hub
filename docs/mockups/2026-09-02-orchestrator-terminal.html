@@ -1,0 +1,70 @@
+<style>
+  .cockpit-preview { background:#000; border:1px solid #2a2a2c; color:#ededea; font-family:"Cascadia Mono",Consolas,monospace; padding:18px; min-height:740px; }
+  .preview-nav { display:flex; border:1px solid #2a2a2c; margin-bottom:16px; }
+  .preview-nav span { flex:1; padding:9px 12px; border-right:1px solid #2a2a2c; color:#8e8e88; font-size:10px; letter-spacing:.12em; }
+  .preview-nav span:last-child { border-right:0; }
+  .preview-nav .active { background:#ededea; color:#0a0a0b; }
+  .terminal { border:1px solid rgba(237,237,234,.35); border-top:2px solid #f0871f; background:rgba(6,6,7,.92); }
+  .terminal-head { display:flex; align-items:center; gap:14px; padding:10px 13px; border-bottom:1px solid #2a2a2c; font-size:10px; letter-spacing:.08em; }
+  .terminal-head strong { font-family:Anybody,system-ui,sans-serif; font-size:13px; letter-spacing:.04em; }
+  .terminal-head .identity { color:#f0871f; }
+  .terminal-head .spacer { flex:1; }
+  .terminal-head button, .terminal-compose button, .run-workers { border:1px solid rgba(237,237,234,.4); border-radius:0; background:#0a0a0b; color:#ededea; font:inherit; font-size:10px; padding:6px 9px; cursor:pointer; }
+  .terminal-body { height:306px; overflow:hidden; padding:14px; font-size:12px; line-height:1.55; }
+  .entry { margin-bottom:13px; }
+  .stamp { color:#8e8e88; font-size:10px; letter-spacing:.08em; margin-bottom:3px; }
+  .user-line { color:#ededea; }
+  .user-line b { color:#5aa9f0; }
+  .assistant-line b { color:#f0871f; }
+  .snapshot { margin-top:7px; border-left:2px solid #8e8e88; background:#101012; padding:7px 10px; color:#c4c4be; }
+  .snapshot .quiet { color:#8e8e88; }
+  .delegation { margin-top:7px; border:1px solid #2a2a2c; }
+  .delegation-title { padding:7px 9px; border-bottom:1px solid #2a2a2c; color:#f0871f; font-size:10px; letter-spacing:.1em; }
+  .assignment { display:grid; grid-template-columns:65px 1fr; gap:10px; padding:7px 9px; border-bottom:1px solid #2a2a2c; }
+  .assignment:last-child { border-bottom:0; }
+  .assignment span { color:#8e8e88; }
+  .terminal-compose { display:flex; gap:10px; align-items:center; border-top:1px solid #2a2a2c; padding:10px 13px; }
+  .terminal-compose .prompt { color:#f0871f; }
+  .terminal-compose .input { flex:1; color:#8e8e88; }
+  .terminal-compose .send { border-color:#f0871f; color:#f0871f; }
+  .workers-heading { display:flex; justify-content:space-between; margin:19px 0 9px; font-size:10px; letter-spacing:.1em; color:#8e8e88; }
+  .worker-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:13px; }
+  .worker { min-height:190px; background:rgba(6,6,7,.88); border:1px solid rgba(237,237,234,.28); padding:11px; position:relative; }
+  .worker:before { content:""; position:absolute; left:-1px; right:-1px; top:-1px; height:2px; background:#5aa9f0; }
+  .worker.claude:before { background:#f0871f; }
+  .worker.agy:before { background:linear-gradient(90deg,#e86fd0,#5aa9f0,#3fd0c8); }
+  .worker h4 { margin:3px 0 10px; font-size:12px; }
+  .worker h4 small { color:#8e8e88; font-weight:400; font-size:9px; }
+  .worker .state { color:#ededea; font-size:10px; margin-bottom:10px; }
+  .worker pre { margin:0; white-space:pre-wrap; color:#c4c4be; font:10px/1.5 "Cascadia Mono",Consolas,monospace; }
+  .worker footer { position:absolute; left:11px; right:11px; bottom:9px; border-top:1px solid #2a2a2c; padding-top:7px; display:flex; justify-content:space-between; color:#8e8e88; font-size:9px; }
+  .preview-note { color:#8e8e88; font-family:Anybody,system-ui,sans-serif; font-size:12px; margin:0 0 16px; }
+  @media (max-width: 760px) { .worker-grid { grid-template-columns:1fr; } .terminal-head .identity { display:none; } }
+</style>
+
+<h2>Orchestrator terminal</h2>
+<p class="subtitle">A full-width planning conversation replaces the duplicate Delegation and Orchestrator plates. This view shows a live worker run.</p>
+
+<div class="cockpit-preview">
+  <div class="preview-nav"><span>PROPOSE</span><span>HOLD</span><span class="active">MERGE</span><span>SYNC</span></div>
+  <div class="terminal">
+    <div class="terminal-head">
+      <strong>ORCHESTRATOR</strong><span class="identity">CLAUDE · SONNET · HIGH</span><span>▮▮▮▮ WORKERS RUNNING</span><span class="spacer"></span><button>NEW CONVERSATION</button>
+    </div>
+    <div class="terminal-body">
+      <div class="entry"><div class="stamp">YOU · 10:42</div><div class="user-line"><b>&gt;</b> Split the benchmark research by coding, reasoning, and agentic tasks.</div></div>
+      <div class="entry"><div class="stamp">ORCHESTRATOR · 10:43</div><div class="assistant-line"><b>&lt;</b> I have proposed three focused assignments. Review them, then release the workers.</div>
+        <div class="delegation"><div class="delegation-title">DELEGATION ACCEPTED · RUN 0042</div><div class="assignment"><span>W3</span><div>Coding and software-engineering benchmarks</div></div><div class="assignment"><span>W1</span><div>General reasoning, knowledge, and multimodal benchmarks</div></div><div class="assignment"><span>W2</span><div>Agentic tasks, tool use, and long-horizon autonomy</div></div></div>
+      </div>
+      <div class="entry"><div class="stamp">YOU · 10:47</div><div class="user-line"><b>&gt;</b> How is the run going so far?</div></div>
+      <div class="entry"><div class="stamp">ORCHESTRATOR · 10:47 · RUN-STATUS SNAPSHOT</div><div class="snapshot">W3 <span class="quiet">▮▮▮▮ RUN · 2m 18s</span> · drafting benchmark coverage<br>W1 <span class="quiet">▮▮▮▮ RUN · 2m 18s</span> · collecting general-purpose sources<br>W2 <span class="quiet">▮▮▮▮ RUN · 2m 18s</span> · validating agent benchmarks</div></div>
+    </div>
+    <div class="terminal-compose"><span class="prompt">&gt;</span><span class="input">Ask the Orchestrator about this run…</span><button class="send">SEND</button></div>
+  </div>
+  <div class="workers-heading"><span>WORKERS · 3</span><span>ONE ACCEPTED DELEGATION · RUN 0042</span></div>
+  <div class="worker-grid">
+    <article class="worker"><h4>W3 <small>CODEX · GPT-5.5 · MEDIUM</small></h4><div class="state">▮▮▮▮ RUNNING</div><pre>HumanEval/LiveCodeBench each pose code synthesis. SWE-bench-style benchmarks test repository tasks…</pre><footer><span>57 tps</span><span>9,839 out</span></footer></article>
+    <article class="worker claude"><h4>W1 <small>CLAUDE · SONNET · MEDIUM</small></h4><div class="state">▮▮▮▮ RUNNING</div><pre>State of Play: General Reasoning, Knowledge &amp; Multimodal Capability. I am comparing benchmark limits…</pre><footer><span>41 tps</span><span>6,524 out</span></footer></article>
+    <article class="worker agy"><h4>W2 <small>AGY · GEMINI · MEDIUM</small></h4><div class="state">▮▮▮▮ RUNNING</div><pre>WebArena and GAIA measure multi-step tasks. I have located primary evaluations and critiques…</pre><footer><span>112 tps</span><span>52,914 out</span></footer></article>
+  </div>
+</div>

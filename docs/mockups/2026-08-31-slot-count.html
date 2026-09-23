@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Adding and removing slots — centred</title>
+<style>
+  body { background:#0a0a0b; color:#8E8E88; margin:0; padding:28px;
+         font-family:"Cascadia Mono",ui-monospace,Consolas,monospace; font-size:11px; }
+  h1 { font-size:13px; letter-spacing:.22em; text-transform:uppercase; color:#EDEDEA; font-weight:620; margin:0 0 6px; }
+  h2 { font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:#EDEDEA; font-weight:620;
+       margin:30px 0 4px; padding-top:13px; border-top:1px solid rgba(237,237,234,.14); }
+  h2 .tag { float:right; font-size:8.5px; letter-spacing:.12em; color:#5A5A55; text-transform:none; }
+  .meta { font-size:10px; line-height:1.7; max-width:74ch; margin:0 0 22px; }
+  .lede { font-size:10px; line-height:1.7; max-width:74ch; margin:0 0 12px; }
+
+  .wrap { --plate:rgba(6,6,7,.88); --plate-edge:rgba(237,237,234,.22);
+    --ink:#EDEDEA; --ink-dim:#8E8E88; --ink-idle:#5A5A55;
+    --slot-anthropic:#C8785C; --slot-openai:#4FA88B; --slot-google:#6E97D8; --slot-spare:#9B87C4;
+    background:var(--plate); border:1px solid var(--plate-edge); padding:13px;
+    max-width:908px; color:var(--ink); }
+
+  /* centred, capped, wrapping — the adjustment */
+  .slots { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; }
+  .slots .cd, .slots .ghost { flex:0 0 248px; max-width:248px; }
+  .slots.left { justify-content:flex-start; }
+
+  .cd { border:1px solid var(--plate-edge); padding:0 0 8px; min-width:0; position:relative; }
+  .cd .cap { height:2px; }
+  .cd .in { padding:8px 9px 0; }
+  .cd .nm { font-size:10px; letter-spacing:.08em; display:flex; justify-content:space-between;
+            align-items:baseline; margin-bottom:5px; gap:6px; }
+  .cd .nm span.n { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .cd .nm em { font-style:normal; color:var(--ink-dim); font-size:9px; letter-spacing:.10em; }
+  .cd .x { border:0; background:transparent; color:var(--ink-idle); font:inherit; font-size:11px;
+           cursor:pointer; padding:0 0 0 3px; line-height:1; }
+  .cd .x:hover { color:var(--ink); }
+  .cd .s { font-size:10px; letter-spacing:.10em; margin:6px 0; color:var(--ink-idle); }
+  .cd .bar { margin:7px 9px 0; padding-top:6px; border-top:1px solid rgba(237,237,234,.11);
+             font-size:9px; color:var(--ink-dim); display:flex; justify-content:space-between; }
+  .fld { background:#0a0a0b; color:var(--ink); border:1px solid var(--plate-edge);
+         font:inherit; font-size:9.5px; padding:3px 5px; letter-spacing:.05em; width:100%; margin-bottom:6px; }
+
+  .ghost { border:1px dashed rgba(237,237,234,.30); display:flex; align-items:center;
+           justify-content:center; color:var(--ink-idle); font-size:10px; letter-spacing:.10em;
+           cursor:pointer; min-height:112px; }
+  .ghost:hover { border-color:rgba(237,237,234,.55); color:var(--ink); }
+
+  .cap-note { font-size:9px; color:var(--ink-idle); letter-spacing:.05em; margin:9px 0 0; line-height:1.6; }
+  .cap-note b { color:#EDEDEA; font-weight:400; }
+  .rules { max-width:74ch; margin:26px 0 0; font-size:10px; line-height:1.75;
+           padding:12px 14px; border:1px solid rgba(237,237,234,.16); }
+  .rules b { color:#EDEDEA; font-weight:400; }
+  .amber { color:#C8785C; }
+</style>
+</head>
+<body>
+
+<h1>Adding and removing slots — centred</h1>
+<p class="meta">
+  Same as before: ghost card to add, <b style="color:#EDEDEA">×</b> to remove, both only while idle,
+  cards capped at 248px. The one change is that the row is centred rather than left-aligned, so a
+  two-worker fan sits under the middle of the column instead of hugging its left edge.
+</p>
+
+<h2>Two workers <span class="tag">minimum — no × on any card</span></h2>
+<div class="wrap">
+  <div class="slots">
+    <div class="cd"><div class="cap" style="background:var(--slot-anthropic)"></div><div class="in">
+      <div class="nm"><span class="n">opus</span><em>anthropic</em></div>
+      <select class="fld"><option>claude-opus-5</option></select>
+      <select class="fld"><option>▮▮▮▯ HIGH</option></select>
+      <div class="s">▯▯▯▯ IDLE</div>
+    </div><div class="bar"><span>—</span><span>0</span></div></div>
+
+    <div class="cd"><div class="cap" style="background:var(--slot-openai)"></div><div class="in">
+      <div class="nm"><span class="n">terra</span><em>openai</em></div>
+      <select class="fld"><option>gpt-5.6-sol</option></select>
+      <select class="fld"><option>▮▮▯▯ MED</option></select>
+      <div class="s">▯▯▯▯ IDLE</div>
+    </div><div class="bar"><span>—</span><span>0</span></div></div>
+
+    <div class="ghost">+ add slot</div>
+  </div>
+  <p class="cap-note">Two cards and the ghost, centred as a group of three. <b>No ×</b> — you are at the floor, so the control is absent rather than disabled.</p>
+</div>
+
+<h2>Four workers <span class="tag">today's default</span></h2>
+<div class="wrap">
+  <div class="slots">
+    <div class="cd"><div class="cap" style="background:var(--slot-anthropic)"></div><div class="in">
+      <div class="nm"><span class="n">opus</span><em>anthropic</em><button class="x">×</button></div>
+      <select class="fld"><option>claude-opus-5</option></select>
+      <select class="fld"><option>▮▮▮▯ HIGH</option></select>
+      <div class="s">▯▯▯▯ IDLE</div>
+    </div><div class="bar"><span>—</span><span>0</span></div></div>
+
+    <div class="cd"><div class="cap" style="background:var(--slot-openai)"></div><div class="in">
+      <div class="nm"><span class="n">terra</span><em>openai</em><button class="x">×</button></div>
+      <select class="fld"><option>gpt-5.6-sol</option></select>
+      <select class="fld"><option>▮▮▯▯ MED</option></select>
+      <div class="s">▯▯▯▯ IDLE</div>
+    </div><div class="bar"><span>—</span><span>0</span></div></div>
+
+    <div class="cd"><div class="cap" style="background:var(--slot-google)"></div><div class="in">
+      <div class="nm"><span class="n">gemini</span><em>google</em><button class="x">×</button></div>
+      <select class="fld"><option>gemini-3-pro</option></select>
+      <select class="fld"><option>▮▮▯▯ MED</option></select>
+      <div class="s">▯▯▯▯ IDLE</div>
+    </div><div class="bar"><span>—</span><span>0</span></div></div>
+
+    <div class="cd"><div class="cap" style="background:var(--slot-anthropic)"></div><div class="in">
+      <div class="nm"><span class="n">sonnet</span><em>anthropic</em><button class="x">×</button></div>
+      <select class="fld"><option>claude-sonnet-5</option></select>
+      <select class="fld"><option>▮▮▯▯ MED</option></select>
+      <div class="s">▯▯▯▯ IDLE</div>
+    </div><div class="bar"><span>—</span><span>0</span></div></div>
+
+    <div class="ghost">+ add slot</div>
+  </div>
+  <p class="cap-note">Three fit the row; the fourth card and the ghost centre themselves underneath.</p>
+</div>
+
+<h2>Five workers <span class="tag">maximum — no ghost card</span></h2>
+<div class="wrap">
+  <div class="slots">
+    <div class="cd"><div class="cap" style="background:var(--slot-anthropic)"></div><div class="in">
+      <div class="nm"><span class="n">opus</span><em>anthropic</em><button class="x">×</button></div>
+      <select class="fld"><option>claude-opus-5</option></select>
+      <select class="fld"><option>▮▮▮▯ HIGH</option></select>
+      <div class="s">▯▯▯▯ IDLE</div>
+    </div><div class="bar"><span>—</span><span>0</span></div></div>
+
+    <div class="cd"><div class="cap" style="background:var(--slot-openai)"></div><div class="in">
+      <div class="nm"><span class="n">terra</span><em>openai</em><button class="x">×</button></div>
+      <select class="fld"><option>gpt-5.6-sol</option></select>
+      <select class="fld"><option>▮▮▯▯ MED</option></select>
+      <div class="s">▯▯▯▯ IDLE</div>
+    </div><div class="bar"><span>—</span><span>0</span></div></div>
+
+    <div class="cd"><div class="cap" style="background:var(--slot-google)"></div><div class="in">
+      <div class="nm"><span class="n">gemini</span><em>google</em><button class="x">×</button></div>
+      <select class="fld"><option>gemini-3-pro</option></select>
+      <select class="fld"><option>▮▮▯▯ MED</option></select>
+      <div class="s">▯▯▯▯ IDLE</div>
+    </div><div class="bar"><span>—</span><span>0</span></div></div>
+
+    <div class="cd"><div class="cap" style="background:var(--slot-anthropic)"></div><div class="in">
+      <div class="nm"><span class="n">sonnet</span><em>anthropic</em><button class="x">×</button></div>
+      <select class="fld"><option>claude-sonnet-5</option></select>
+      <select class="fld"><option>▮▮▯▯ MED</option></select>
+      <div class="s">▯▯▯▯ IDLE</div>
+    </div><div class="bar"><span>—</span><span>0</span></div></div>
+
+    <div class="cd"><div class="cap" style="background:var(--slot-spare)"></div><div class="in">
+      <div class="nm"><span class="n">grok</span><em>xai</em><button class="x">×</button></div>
+      <select class="fld"><option>grok-5</option></select>
+      <select class="fld"><option>▮▮▯▯ MED</option></select>
+      <div class="s">▯▯▯▯ IDLE</div>
+    </div><div class="bar"><span>—</span><span>0</span></div></div>
+  </div>
+  <p class="cap-note">Three across, two centred beneath. The ghost is gone — nothing says "you can't", there is simply nothing to click.</p>
+</div>
+
+<h2>Centred vs left, at two cards <span class="tag">the change itself</span></h2>
+<div class="wrap" style="margin-bottom:9px">
+  <p class="cap-note" style="margin:0 0 9px"><b>Centred</b> — the pair reads as the whole content of the row.</p>
+  <div class="slots">
+    <div class="cd"><div class="cap" style="background:var(--slot-anthropic)"></div><div class="in">
+      <div class="nm"><span class="n">opus</span><em>anthropic</em></div>
+      <div class="s">▯▯▯▯ IDLE</div></div><div class="bar"><span>—</span><span>0</span></div></div>
+    <div class="cd"><div class="cap" style="background:var(--slot-openai)"></div><div class="in">
+      <div class="nm"><span class="n">terra</span><em>openai</em></div>
+      <div class="s">▯▯▯▯ IDLE</div></div><div class="bar"><span>—</span><span>0</span></div></div>
+  </div>
+</div>
+<div class="wrap">
+  <p class="cap-note" style="margin:0 0 9px"><b>Left-aligned</b> — reads as four cards with two missing.</p>
+  <div class="slots left">
+    <div class="cd"><div class="cap" style="background:var(--slot-anthropic)"></div><div class="in">
+      <div class="nm"><span class="n">opus</span><em>anthropic</em></div>
+      <div class="s">▯▯▯▯ IDLE</div></div><div class="bar"><span>—</span><span>0</span></div></div>
+    <div class="cd"><div class="cap" style="background:var(--slot-openai)"></div><div class="in">
+      <div class="nm"><span class="n">terra</span><em>openai</em></div>
+      <div class="s">▯▯▯▯ IDLE</div></div><div class="bar"><span>—</span><span>0</span></div></div>
+  </div>
+</div>
+
+<div class="rules">
+  <b>What this changes in the decided design.</b>
+  <code>grid-template-columns:repeat(4,1fr)</code> becomes
+  <code>display:flex; flex-wrap:wrap; justify-content:center</code> with cards fixed at 248px.
+  Card header gains a <b>×</b> while idle, absent at two workers. A dashed <b>+ add slot</b> follows
+  the last card, absent at five. A new card starts on its vendor's default model and effort from the
+  <code>executors</code> block — what <code>resolveModelEffort</code> already does for a slot that
+  names nothing.
+  <br><br>
+  <b class="amber">One cost of centring.</b> Adding or removing a card re-centres the whole row, so
+  every other card shifts sideways under the cursor. Left-alignment moves only the cards after the
+  one you touched. It is a click or two, while idle, and never during a run — but it is the thing
+  you would notice if you added three slots in a row.
+</div>
+
+</body>
+</html>

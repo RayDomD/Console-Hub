@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cockpit · Console plate · navigation from rest</title>
+<style>
+body{background:#000;margin:0;padding:24px 16px}
+.stage2 {
+  --page: #0a0a0b; --ink: #ededea; --dim: #83837d; --muted: #8e8e88;
+  --plate: rgba(6,6,7,.92); --hair: rgba(237,237,234,.22); --rule: rgba(237,237,234,.14);
+  position: relative; max-width: 980px; margin: 0 auto; height: 560px; overflow: hidden;
+  background: var(--page); border: 1px solid var(--hair);
+  font-family: 'Cascadia Mono', ui-monospace, Consolas, monospace; color: var(--ink);
+}
+.surface2 { position: absolute; inset: 0; padding: 16px; transition: opacity .42s ease, transform .42s ease; }
+.surface2[data-state="out-back"] { opacity: 0; transform: scale(1.08); pointer-events: none; }
+.surface2[data-state="out-front"] { opacity: 0; transform: scale(.94); pointer-events: none; }
+.wordmark { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); font-size: 10px; letter-spacing: .5em; color: var(--dim); }
+.corner { position: absolute; bottom: 10px; left: 14px; font-size: 9px; color: var(--dim); }
+.corner.r { left: auto; right: 14px; }
+.plate2 { position: absolute; background: var(--plate); border: 1px solid var(--hair); padding: 9px 11px; }
+.plate2 h4 { margin: 0 0 7px; font-size: 9px; letter-spacing: .16em; color: var(--muted); text-transform: uppercase; font-weight: 400; }
+.plate2 p { margin: 3px 0; font-size: 9.5px; color: var(--dim); }
+.door { cursor: pointer; transition: border-color .18s, transform .18s; }
+.door:hover { border-color: var(--ink); transform: translateY(-1px); }
+.link { color: var(--ink); text-decoration: underline; cursor: pointer; }
+.link:hover { color: #fff; }
+
+.hub-head { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid var(--rule); padding-bottom: 7px; margin-bottom: 12px; }
+.hub-head b { font-size: 10px; letter-spacing: .18em; font-weight: 400; }
+.esc { font-size: 9px; color: var(--muted); letter-spacing: .1em; cursor: pointer; }
+.esc:hover { color: var(--ink); }
+
+.rail { position: absolute; left: 0; top: 34px; bottom: 0; width: 28px; border-right: 1px solid var(--rule); display: flex; flex-direction: column; align-items: center; gap: 6px; padding-top: 6px; }
+.rail .r-btn { width: 20px; height: 20px; border: 1px solid transparent; }
+.rail .r-btn.on { border-color: var(--rule); background: rgba(237,237,234,.08); }
+.hub-stage { position: absolute; left: 34px; right: 0; top: 34px; bottom: 0; overflow: auto; }
+
+.cHead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.cTitle h1{margin:0;font-size:16px;font-weight:720}
+.badge{border:1px solid var(--muted);color:var(--ink);padding:3px 6px;font-size:8px}
+.cMeta{font-size:8px;color:var(--dim)}
+.btn{border:1px solid var(--rule);background:transparent;color:var(--muted);padding:5px 8px;font-size:8px;text-transform:uppercase;letter-spacing:.08em;cursor:pointer}
+.btn:hover{border-color:var(--ink);color:var(--ink)}
+.term2{background:#050506;border:1px solid var(--rule);padding:10px;font-size:9.5px;line-height:1.7;color:var(--dim);height:380px}
+.term2 b{color:var(--ink);font-weight:400}
+
+.note { max-width: 980px; margin: 12px auto 0; font-size: 12px; color: #8e8e88; font-family: sans-serif; line-height: 1.6; }
+.ctl { max-width:980px; margin: 0 auto 10px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.ctl button { font: inherit; font-size: 12px; padding: 5px 12px; cursor: pointer; background: #fff; border: 1px solid #d6d3d1; border-radius: 4px; }
+.ctl button:hover { border-color: #78716c; }
+.ctl span { font-size: 12px; color: #78716c; }
+</style>
+</head>
+<body>
+
+<h2 style="color:#ededea;font-family:sans-serif">Navigation from rest → console plate</h2>
+<p class="sub" style="color:#8e8e88;font-family:sans-serif;max-width:980px;margin:0 auto 14px">Two entry points do the same thing: click <b>Console Hub</b> in the Vault Health plate, or the door plate itself. Both call <code>setSurface('hub')</code> + <code>select('console')</code> — same flight the fan uses, landing on the console recipe instead of at-rest.</p>
+
+<div class="ctl">
+  <button data-choice="show-rest" onclick="go2('rest')">Show Rest</button>
+  <button data-choice="show-hub" onclick="go2('hub')">Show Hub · console</button>
+  <span id="where2">on: rest</span>
+</div>
+
+<div class="stage2" id="stage2" tabindex="0">
+
+  <div class="surface2" id="restS" data-state="in">
+    <div class="wordmark">COCKPIT</div>
+
+    <div class="plate2" style="top:44px; left:16px; width:220px">
+      <h4>Vault health</h4>
+      <p>690 files indexed</p>
+      <p>1 defect · 9 inbox</p>
+      <p style="margin-top:8px">Console: <span class="link" data-choice="vault-health-console-link" onclick="go2('hub')">Console Hub →</span></p>
+    </div>
+
+    <div class="plate2" style="top:44px; right:16px; width:200px">
+      <h4>Skills</h4>
+      <p>1 wired · idle</p>
+    </div>
+
+    <div class="plate2 door" style="top:220px; left:50%; transform:translateX(-50%); width:250px" data-choice="door-console-hub" onclick="go2('hub')">
+      <h4>Console hub</h4>
+      <p>2 consoles · 1 idle</p>
+      <p style="font-size:8.5px;letter-spacing:.1em;color:var(--muted);margin-top:6px">CLICK TO ENTER</p>
+    </div>
+
+    <div class="corner">C:\FILES\VAULT</div>
+    <div class="corner r">TUNE · LAYER 0</div>
+  </div>
+
+  <div class="surface2" id="hubS" data-state="out-front">
+    <div class="hub-head">
+      <b>HUB</b>
+      <span class="esc" data-choice="return-to-rest" onclick="go2('rest')">↩ Return to rest</span>
+    </div>
+    <div class="rail">
+      <div class="r-btn"></div>
+      <div class="r-btn"></div>
+      <div class="r-btn on"></div>
+    </div>
+    <div class="hub-stage">
+      <div class="cHead">
+        <div class="cTitle"><h1>Console</h1><span class="badge">INTERACTIVE</span></div>
+        <div style="display:flex;align-items:center;gap:8px"><span class="cMeta">C:\FIles\Cockpit · pwsh.exe</span><button class="btn" data-choice="clear-console">Clear</button></div>
+      </div>
+      <div class="term2">
+        <b>PS C:\FIles\Cockpit&gt;</b> npm test<br>
+        &nbsp;&nbsp;Test Files 36 passed<br>
+        &nbsp;&nbsp;Tests 467 passed | 1 skipped<br>
+        <b>PS C:\FIles\Cockpit&gt;</b> <span style="opacity:.6">▋</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<p class="note">
+  No overlay is painted over Vault Health — the whole surface flies to the Hub, landing directly on
+  the console recipe. <b>Esc</b> or "Return to rest" is the only way back; the console never grows
+  its own back button.
+</p>
+
+<script>
+  function go2(which) {
+    document.getElementById('restS').dataset.state = which === 'rest' ? 'in' : 'out-back';
+    document.getElementById('hubS').dataset.state = which === 'hub' ? 'in' : 'out-front';
+    document.getElementById('where2').textContent = 'on: ' + which;
+  }
+  document.getElementById('stage2').addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') go2('rest');
+  });
+</script>
+</body>
+</html>

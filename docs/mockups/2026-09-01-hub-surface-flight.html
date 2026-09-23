@@ -1,0 +1,193 @@
+<style>
+  .stage {
+    --page: #0a0a0b; --ink: #ededea; --dim: #83837d; --muted: #8e8e88;
+    --plate: rgba(6,6,7,.92); --hair: rgba(237,237,234,.22); --rule: rgba(237,237,234,.14);
+    --anthropic: #c8785c; --openai: #4fa88b;
+    position: relative; height: 560px; overflow: hidden;
+    background: var(--page); border: 1px solid var(--hair);
+    font-family: 'Cascadia Mono', ui-monospace, Consolas, monospace; color: var(--ink);
+  }
+  .surface {
+    position: absolute; inset: 0; padding: 16px;
+    transition: opacity .42s ease, transform .42s ease;
+  }
+  .surface[data-state="out-back"] { opacity: 0; transform: scale(1.08); pointer-events: none; }
+  .surface[data-state="out-front"] { opacity: 0; transform: scale(.94); pointer-events: none; }
+
+  .wordmark { position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+    font-size: 10px; letter-spacing: .5em; color: var(--dim); }
+  .corner { position: absolute; bottom: 10px; left: 14px; font-size: 9px; color: var(--dim); }
+  .corner.r { left: auto; right: 14px; }
+
+  .plate { position: absolute; background: var(--plate); border: 1px solid var(--hair); padding: 9px 11px; }
+  .plate h4 { margin: 0 0 7px; font-size: 9px; letter-spacing: .16em; color: var(--muted);
+    text-transform: uppercase; font-weight: 400; }
+  .plate p { margin: 3px 0; font-size: 9.5px; color: var(--dim); }
+
+  .door { cursor: pointer; transition: border-color .18s, transform .18s; }
+  .door:hover { border-color: var(--ink); transform: translateY(-1px); }
+  .door .live { display: flex; justify-content: space-between; gap: 14px; font-size: 10px; color: var(--ink); }
+  .door .hint { margin-top: 6px; font-size: 8.5px; letter-spacing: .1em; color: var(--muted); }
+  .pulse { display: inline-block; width: 5px; height: 5px; background: var(--anthropic);
+    border-radius: 50%; margin-right: 5px; animation: b 1.6s infinite; }
+  @keyframes b { 0%,100% { opacity: .35 } 50% { opacity: 1 } }
+
+  .hub-head { display: flex; justify-content: space-between; align-items: baseline;
+    border-bottom: 1px solid var(--rule); padding-bottom: 7px; margin-bottom: 12px; }
+  .hub-head b { font-size: 10px; letter-spacing: .18em; font-weight: 400; }
+  .esc { font-size: 9px; color: var(--muted); letter-spacing: .1em; cursor: pointer; }
+  .esc:hover { color: var(--ink); }
+
+  .hub-body { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; height: 452px; }
+  .pane { border: 1px solid var(--hair); background: var(--plate); padding: 10px; overflow: hidden; }
+  .pane h5 { margin: 0 0 8px; font-size: 9px; letter-spacing: .16em; color: var(--muted);
+    text-transform: uppercase; font-weight: 400; }
+  .cards { display: flex; flex-wrap: wrap; gap: 6px; }
+  .card { flex: 0 0 calc(50% - 3px); border: 1px solid var(--hair); padding: 6px 7px; font-size: 8.5px; }
+  .card .cap { height: 2px; margin: -6px -7px 6px; }
+  .card .nm { display: flex; justify-content: space-between; color: var(--ink); }
+  .card .st { color: var(--dim); margin-top: 4px; }
+  .term { background: #050506; border: 1px solid var(--rule); padding: 8px; font-size: 8.5px;
+    color: var(--dim); line-height: 1.7; height: 148px; }
+  .term b { color: var(--ink); font-weight: 400; }
+
+  .note { margin: 14px 0 0; font-size: 12px; color: #57534e; line-height: 1.6; }
+  .ctl { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+  .ctl button { font: inherit; font-size: 12px; padding: 5px 12px; cursor: pointer;
+    background: #fff; border: 1px solid #d6d3d1; border-radius: 4px; }
+  .ctl button:hover { border-color: #78716c; }
+  .ctl span { font-size: 12px; color: #78716c; }
+</style>
+
+<h2>Hub surface — the behaviour</h2>
+<p class="sub">Click the door plate on Rest to fly in. <b>Esc</b>, or the return control, comes back. This is Option A's flight with Option B's contents: a console that is a plate on the surface, not an overlay painted over it.</p>
+
+<div class="ctl">
+  <button onclick="go('rest')">Show Rest</button>
+  <button onclick="go('hub')">Show Hub</button>
+  <span id="where">on: rest</span>
+</div>
+
+<div class="stage" id="stage" tabindex="0">
+
+  <div class="surface" id="rest" data-state="in">
+    <div class="wordmark">COCKPIT</div>
+
+    <div class="plate" style="top:44px; left:16px; width:190px">
+      <h4>Vault health</h4>
+      <p>690 files indexed</p>
+      <p>1 defect · 9 inbox</p>
+    </div>
+
+    <div class="plate" style="top:44px; right:16px; width:210px">
+      <h4>Skills</h4>
+      <p>1 wired · idle</p>
+      <p>vault health · claude</p>
+    </div>
+
+    <div class="plate" style="bottom:66px; left:16px; width:190px">
+      <h4>Atlas</h4>
+      <p>Inspect the full corpus</p>
+    </div>
+
+    <div class="plate door" style="top:210px; left:50%; transform:translateX(-50%); width:250px"
+         onclick="go('hub')">
+      <h4>Console hub</h4>
+      <div class="live"><span><span class="pulse"></span>fan · 2 of 4 in</span><span>31.5k</span></div>
+      <div class="live" style="margin-top:4px"><span>2 consoles</span><span>1 idle</span></div>
+      <p class="hint">CLICK TO ENTER</p>
+    </div>
+
+    <div class="corner">C:\FILES\VAULT</div>
+    <div class="corner r">TUNE · LAYER 0</div>
+  </div>
+
+  <div class="surface" id="hub" data-state="out-front">
+    <div class="hub-head">
+      <b>CONSOLE HUB</b>
+      <span class="esc" onclick="go('rest')">ESC · back to rest ↩</span>
+    </div>
+    <div class="hub-body">
+
+      <div class="pane">
+        <h5>Question fan</h5>
+        <div class="cards">
+          <div class="card">
+            <div class="cap" style="background:var(--anthropic)"></div>
+            <div class="nm"><span>opus</span><span>claude</span></div>
+            <div class="st">▮▮▮▮ done · 234 tok</div>
+          </div>
+          <div class="card">
+            <div class="cap" style="background:var(--openai)"></div>
+            <div class="nm"><span>gpt-5.6-terra</span><span>codex</span></div>
+            <div class="st">▯▯▯▯ running</div>
+          </div>
+          <div class="card">
+            <div class="cap" style="background:var(--anthropic)"></div>
+            <div class="nm"><span>sonnet</span><span>claude</span></div>
+            <div class="st">▮▮▮▮ done · 178 tok</div>
+          </div>
+          <div class="card">
+            <div class="cap" style="background:var(--openai)"></div>
+            <div class="nm"><span>gpt-5.5</span><span>codex</span></div>
+            <div class="st">▯▯▯▯ running</div>
+          </div>
+        </div>
+        <p style="font-size:9px;color:var(--dim);margin-top:10px">
+          ↳ architect · scope DOCS · waiting on 2
+        </p>
+      </div>
+
+      <div class="pane">
+        <h5>Console A · PowerShell</h5>
+        <div class="term">
+          <b>PS C:\FIles\Cockpit&gt;</b> npm test<br>
+          &nbsp;&nbsp;Test Files 36 passed<br>
+          &nbsp;&nbsp;Tests 467 passed | 1 skipped<br>
+          <b>PS C:\FIles\Cockpit&gt;</b> <span style="opacity:.6">▋</span>
+        </div>
+        <p style="font-size:9px;color:var(--dim);margin-top:9px">
+          Same surface as the fan. No overlay, no z-index, one way back.
+        </p>
+        <p style="font-size:9px;color:var(--dim);margin-top:14px">
+          Phase 2 adds here: wires between a console and a slot, free placement,
+          card sizes, status rail.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<p class="note">
+  What is being decided: the <b>flight</b>, not the arrangement. The two panes above are a
+  placeholder split — how the fan and console actually sit together is the phase-2 canvas question.
+  What matters now is that both live on one surface you enter and leave, instead of a plate on Rest
+  plus a full-screen overlay with its own back button.
+</p>
+
+<div class="options">
+  <div class="option" onclick="pick('B-full')">
+    <b>B — migrate the console now</b>
+    <span>The overlay mechanism is deleted. The Hub has consoles in it, so the name is honest. Bigger ticket.</span>
+  </div>
+  <div class="option" onclick="pick('A-surface-only')">
+    <b>A — surface and door now, console later</b>
+    <span>The fan flies to its own page this week. The Hub has no consoles on it until phase 2.</span>
+  </div>
+  <div class="option" onclick="pick('rethink')">
+    <b>Neither — the flight itself is wrong</b>
+    <span>Say what you would rather it did.</span>
+  </div>
+</div>
+
+<script>
+  function go(which) {
+    document.getElementById('rest').dataset.state = which === 'rest' ? 'in' : 'out-back';
+    document.getElementById('hub').dataset.state = which === 'hub' ? 'in' : 'out-front';
+    document.getElementById('where').textContent = 'on: ' + which;
+  }
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') go('rest');
+  });
+</script>

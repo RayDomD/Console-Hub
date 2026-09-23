@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Console Hub — Calibrated Instrument (Decided 2026-09-03)</title>
+<style>
+  :root {
+    --page: #0A0A0B;
+    --plate: rgba(6, 6, 7, 0.88);
+    --ink: #EDEDEA;
+    --dim: #8E8E88;
+    --rule: #2A2A2C;
+    --hair: rgba(237, 237, 234, 0.22);
+    --chamfer: polygon(0 0, calc(100% - 11px) 0, 100% 11px, 100% 100%, 11px 100%, 0 calc(100% - 11px));
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #000;
+    color: var(--ink);
+    font-family: "Cascadia Mono", monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    padding: 40px 24px 80px;
+  }
+  .wrap { max-width: 1200px; margin: 0 auto; }
+  h1 { font-size: 18px; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; margin-bottom: 6px; }
+  .lede { color: var(--dim); font-size: 12px; margin-bottom: 24px; }
+  .chamfer-box {
+    background: var(--plate);
+    border: 1px solid var(--hair);
+    clip-path: var(--chamfer);
+    position: relative;
+  }
+  .hub-shell {
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr) 240px;
+    gap: 12px;
+    background: var(--page);
+    border: 1px solid var(--rule);
+    padding: 16px;
+    margin: 20px 0;
+  }
+  .nav-pane, .stack-pane {
+    background: var(--page);
+    border: 1px solid var(--rule);
+    padding: 12px;
+    font-size: 9px;
+  }
+  .route {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    margin-bottom: 4px;
+    border: 1px solid var(--rule);
+    color: var(--dim);
+    font-size: 9px;
+  }
+  .route-active {
+    background: rgba(237, 237, 234, 0.08);
+    color: var(--ink);
+    border: 1px solid rgba(237, 237, 234, 0.3);
+    border-left: 3px solid var(--ink);
+    font-weight: bold;
+  }
+  .pipeline-bar {
+    display: flex;
+    background: var(--plate);
+    border: 1px solid var(--rule);
+    margin-bottom: 12px;
+  }
+  .stage-tag {
+    padding: 6px 12px;
+    border-right: 1px solid var(--rule);
+    font-size: 8.5px;
+    letter-spacing: .1em;
+    color: var(--dim);
+  }
+  .stage-tag.active {
+    color: var(--page);
+    background: var(--ink);
+    font-weight: bold;
+  }
+  .terminal-card {
+    margin-bottom: 12px;
+  }
+  .vendor-cap { height: 2px; width: 100%; }
+  .cap-claude { background: #F0871F; }
+  .cap-agy { background: linear-gradient(90deg, #C9A2F0, #5AA9F0, #3FD0C8, #7BE38C, #F0D24A, #F0871F, #E86FD0); }
+  .terminal-head {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--rule);
+    font-size: 9px;
+  }
+  .terminal-body {
+    padding: 14px;
+    min-height: 120px;
+    color: var(--dim);
+    font-size: 9.5px;
+  }
+  .terminal-composer {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-top: 1px solid var(--rule);
+    gap: 8px;
+  }
+  .terminal-notice {
+    padding: 6px 14px 10px 14px;
+    font-size: 8px;
+    color: var(--dim);
+    border-top: 1px solid rgba(237, 237, 234, 0.08);
+  }
+  .workers-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .worker-card {
+    height: 170px;
+    display: flex;
+    flex-direction: column;
+  }
+  .worker-head {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 10px;
+    font-size: 8.5px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .worker-body {
+    flex: 1;
+    padding: 10px;
+    color: var(--dim);
+    font-size: 8.5px;
+  }
+  .worker-foot {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 10px;
+    border-top: 1px solid var(--rule);
+    font-size: 7.5px;
+    color: #5A5A55;
+  }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1>Console Hub — Calibrated Instrument Direction</h1>
+  <p class="lede">Decided 2026-09-03 via <code>/ui-preview</code>. Preserves achromatic restraint, calms navigator active state with 3px chalk rule, fixes chamfer letter clipping, and tightens pre-flight stage rhythm.</p>
+
+  <div class="hub-shell">
+    <div class="nav-pane">
+      <div style="color:var(--dim); font-size:8.5px; letter-spacing:.14em; text-transform:uppercase; margin-bottom:8px;">Console Navigator</div>
+      <div class="route route-active">
+        <span>EXPLORE</span>
+        <span>READ ONLY</span>
+      </div>
+      <div class="route">
+        <span>Synthesize</span>
+        <span>ONE WRITER</span>
+      </div>
+      <div class="route">
+        <span>Debate</span>
+        <span>READ ONLY</span>
+      </div>
+      <div class="route">
+        <span>Coordinate</span>
+        <span>WORKTREES</span>
+      </div>
+    </div>
+
+    <div>
+      <div class="pipeline-bar">
+        <div class="stage-tag" style="font-weight:bold; color:var(--ink);">EXPLORE</div>
+        <div class="stage-tag active">1 ASK</div>
+        <div class="stage-tag">2 INDEPENDENT</div>
+        <div class="stage-tag">3 COMPLETE</div>
+        <div class="stage-tag">4 READ</div>
+      </div>
+
+      <div class="chamfer-box terminal-card">
+        <div class="vendor-cap cap-claude"></div>
+        <div class="terminal-head">
+          <span><strong>ORCHESTRATOR</strong> CLAUDE · SONNET · MEDIUM</span>
+          <span>▯▯▯▯ READY</span>
+        </div>
+        <div class="terminal-body">
+          <p>Say what the Stack should work on. Nothing spends until you propose a delegation.</p>
+        </div>
+        <div class="terminal-composer">
+          <span>&gt;</span>
+          <span style="color:var(--dim); font-size:9px;">Ask the Orchestrator about this run...</span>
+        </div>
+        <div class="terminal-notice">
+          Restored from disk. This is a new agent session with the transcript above as context.
+        </div>
+      </div>
+
+      <div class="workers-grid">
+        <div class="chamfer-box worker-card">
+          <div class="vendor-cap cap-agy"></div>
+          <div class="worker-head">
+            <span><strong>W1</strong> agy · vendor default</span>
+            <span>▯▯▯▯ IDLE</span>
+          </div>
+          <div class="worker-body">Waiting for stream from Orchestrator delegation.</div>
+          <div class="worker-foot">
+            <span>THROUGHPUT: --</span>
+            <span>TOKENS: 0 IN / 0 OUT</span>
+          </div>
+        </div>
+
+        <div class="chamfer-box worker-card">
+          <div class="vendor-cap cap-agy"></div>
+          <div class="worker-head">
+            <span><strong>W4</strong> agy · vendor default</span>
+            <span>▯▯▯▯ IDLE</span>
+          </div>
+          <div class="worker-body">Waiting for stream from Orchestrator delegation.</div>
+          <div class="worker-foot">
+            <span>THROUGHPUT: --</span>
+            <span>TOKENS: 0 IN / 0 OUT</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stack-pane">
+      <div style="color:var(--dim); font-size:8.5px; letter-spacing:.14em; text-transform:uppercase; margin-bottom:8px;">Live Stack 3 of 5</div>
+      <div style="border:1px solid var(--rule); border-left:2px solid #5AA9F0; padding:8px; margin-bottom:6px;">
+        <div style="display:flex; justify-content:space-between;"><strong>W1</strong> <span>DEFAULT</span></div>
+        <div style="font-size:7.5px; color:var(--dim);">WORKER</div>
+      </div>
+      <div style="border:1px solid var(--rule); border-left:2px solid #5AA9F0; padding:8px; margin-bottom:6px;">
+        <div style="display:flex; justify-content:space-between;"><strong>W4</strong> <span>DEFAULT</span></div>
+        <div style="font-size:7.5px; color:var(--dim);">WORKER</div>
+      </div>
+      <div style="border:1px solid var(--rule); border-left:2px solid #F0871F; padding:8px; margin-bottom:6px;">
+        <div style="display:flex; justify-content:space-between;"><strong>ORCHESTRATOR</strong> <span>MEDIUM</span></div>
+        <div style="font-size:7.5px; color:var(--dim);">ORCHESTRATOR</div>
+      </div>
+    </div>
+  </div>
+</main>
+</body>
+</html>

@@ -1,0 +1,27 @@
+/*
+ * Self-hosted, on the product commitment that an app which opens offline must
+ * never wait on a CDN. Both faces ship as variable TTF rather than WOFF2 on
+ * purpose: the only advantage WOFF2 has is transfer size over a network, and
+ * these load from local disk inside the packaged app.
+ *
+ * Licences sit beside the files - both faces are SIL OFL 1.1.
+ *   Anybody       OFL-Anybody.txt        (Google Fonts)
+ *   Cascadia Mono OFL-CascadiaMono.txt   (Microsoft)
+ */
+
+@font-face {
+  font-family: 'Anybody';
+  src: url('./Anybody-Variable.ttf') format('truetype-variations');
+  font-weight: 100 900;
+  font-stretch: 50% 200%;
+  font-style: normal;
+  font-display: block;
+}
+
+@font-face {
+  font-family: 'Cascadia Mono';
+  src: url('./CascadiaMono.ttf') format('truetype');
+  font-weight: 200 700;
+  font-style: normal;
+  font-display: block;
+}

@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Question fan plate — hardened design</title>
+<style>
+  body { background:#0a0a0b; color:#8E8E88; margin:0; padding:28px;
+         font-family:"Cascadia Mono",ui-monospace,Consolas,monospace; font-size:11px; }
+  h1 { font-size:13px; letter-spacing:.22em; text-transform:uppercase; color:#EDEDEA; font-weight:620; margin:0 0 6px; }
+  .meta { font-size:10px; line-height:1.7; max-width:74ch; margin:0 0 22px; }
+  .meta a { color:#EDEDEA; }
+  .qf {
+    --plate:rgba(6,6,7,.88); --plate-edge:rgba(237,237,234,.22); --tick:rgba(237,237,234,.5);
+    --ink:#EDEDEA; --ink-dim:#8E8E88; --ink-idle:#5A5A55;
+    --slot-anthropic:#C8785C; --slot-openai:#4FA88B; --slot-google:#6E97D8; --slot-spare:#9B87C4;
+    background:var(--plate); border:1px solid var(--plate-edge); border-radius:0;
+    clip-path:polygon(0 0, calc(100% - 11px) 0, 100% 11px, 100% 100%, 11px 100%, 0 calc(100% - 11px));
+    position:relative; display:flex; color:var(--ink); max-width:1080px;
+    isolation:isolate;
+  }
+  .tick { position:absolute; left:0; top:0; width:7px; height:7px;
+          border-right:1px solid var(--tick); border-bottom:1px solid var(--tick); }
+  .hd { position:absolute; top:0; left:0; right:0; padding:9px 14px 8px;
+        border-bottom:1px solid rgba(237,237,234,.14); font-size:9px; letter-spacing:.16em;
+        text-transform:uppercase; color:var(--ink-dim); display:flex; justify-content:space-between; }
+  .hd .st { letter-spacing:.10em; color:var(--ink); }
+
+  .sd { width:172px; border-right:1px solid rgba(237,237,234,.14); padding:44px 12px 12px; flex-shrink:0; }
+  .g { font-size:9px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-dim); margin:0 0 8px; }
+  .g.s2 { margin-top:18px; padding-top:13px; border-top:1px solid rgba(237,237,234,.14); }
+  .b { display:block; width:100%; text-align:left; background:transparent; color:var(--ink);
+       border:1px solid var(--plate-edge); border-radius:0; padding:6px 8px; margin-bottom:5px;
+       font-family:inherit; font-size:10px; letter-spacing:.06em; cursor:pointer;
+       transition:background 110ms linear,color 110ms linear,transform 80ms linear,border-color 110ms linear; }
+  .b:hover:not(:disabled), .b:focus-visible { border-color:rgba(237,237,234,.48); }
+  .b:focus-visible, .ask:focus-visible { outline:1px solid var(--ink); outline-offset:2px; }
+  .b:active:not(:disabled) { background:var(--ink); color:#0a0a0b; transform:translateY(1px); }
+  .b:disabled { color:var(--ink-idle); border-color:rgba(237,237,234,.11); cursor:default; }
+  .b.off { color:var(--ink-idle); border-color:rgba(237,237,234,.11); }
+  .b .cx { float:right; color:var(--ink-dim); }
+  .scenario-label { display:block; margin:9px 0 5px; font-size:8px; letter-spacing:.14em;
+                    text-transform:uppercase; color:var(--ink-idle); }
+  .scenario { width:100%; min-width:0; margin-bottom:5px; padding:6px 22px 6px 8px;
+              border:1px solid var(--plate-edge); border-radius:0; background:#0a0a0b; color:var(--ink);
+              font:10px/1.2 inherit; cursor:pointer; }
+  .scenario:focus-visible { outline:1px solid var(--ink); outline-offset:2px; }
+  .scenario:disabled { color:var(--ink-idle); cursor:default; }
+  .sl { display:flex; align-items:stretch; gap:7px; padding:4px 0; font-size:10px; color:var(--ink-dim); }
+  .sl .nm { color:var(--ink); flex:1; align-self:center; }
+  .sl .ef { align-self:center; font-size:9.5px; letter-spacing:.06em; }
+  .swatch { width:3px; min-height:13px; }
+
+  .mn { flex:1; padding:44px 14px 12px; min-width:0; }
+  .ask { border:1px solid var(--plate-edge); padding:10px 12px; margin-bottom:4px;
+         position:relative; overflow:hidden; cursor:text; }
+  .ask::after { content:"; position:absolute; inset:0 auto 0 -1px; width:1px;
+                background:var(--ink); opacity:0; pointer-events:none; }
+  .ask.fire::after { animation:dispatch-cut 240ms cubic-bezier(.16,1,.3,1); }
+  .ask.fire { animation:key-strike 140ms cubic-bezier(.16,1,.3,1); }
+  .ask .h { font-size:9px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-dim);
+            margin-bottom:7px; display:flex; justify-content:space-between; }
+  .ask .h b { color:var(--ink-idle); font-weight:400; letter-spacing:.10em; }
+  .ask .txt { font-size:11px; line-height:1.6; color:var(--ink-dim); }
+  .verb { font-size:9px; color:var(--ink-idle); margin:0 0 11px; letter-spacing:.05em; }
+
+  .crit { border:1px solid rgba(237,237,234,.14); padding:9px 11px; margin-bottom:11px;
+          transform-origin:left center; }
+  .crit.lock { animation:criteria-cut 260ms cubic-bezier(.16,1,.3,1); }
+  .crit .h { font-size:9px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-dim);
+             margin-bottom:7px; display:flex; justify-content:space-between; }
+  .crit .h b { color:var(--ink-idle); font-weight:400; letter-spacing:.10em; }
+  .crit ol { margin:0; padding-left:17px; color:var(--ink-dim); line-height:1.6; font-size:10px; }
+
+  /* Centred and capped rather than a 4-column grid: a fan is 2-5 workers, and stretching two
+     cards across the column turns an instrument into a panel. See 2026-08-31-slot-count.html. */
+  .slots { display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin-bottom:11px; }
+  .slots > .cd { flex:0 0 248px; max-width:248px; }
+  .cd { border:1px solid var(--plate-edge); padding:0 0 8px; min-width:0;
+        position:relative; }
+  .cd.fire { animation:slot-fire 220ms cubic-bezier(.16,1,.3,1) both; }
+  .cd.seat { animation:slot-seat 150ms cubic-bezier(.16,1,.3,1); }
+  .cd .cap { height:2px; }
+  .cd .in { padding:8px 9px 0; }
+  .cd .nm { font-size:10px; letter-spacing:.08em; display:flex; justify-content:space-between;
+            align-items:baseline; margin-bottom:5px; }
+  .cd .nm span { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .cd .nm em { font-style:normal; color:var(--ink-dim); font-size:9px; letter-spacing:.10em; }
+  .cd .ef { font-size:9px; letter-spacing:.12em; color:var(--ink-dim); margin-bottom:6px; }
+  .cd .s { font-size:10px; letter-spacing:.10em; margin-bottom:6px; }
+  .cd .s.run, .cd .s.fail { color:var(--ink); }
+  .cd .s.done { color:var(--ink-dim); } .cd .s.idle { color:var(--ink-idle); }
+  /* A card is a live output view: text arrives as it streams and the finished card keeps its
+     scrollback until the plate closes. 38px is the resting height, not a clamp. */
+  .cd .strm { color:var(--ink-idle); font-size:9.5px; line-height:1.5; height:38px; overflow-y:auto;
+              overflow-wrap:anywhere; }
+  .cd .bar { margin:7px 9px 0; padding-top:6px; border-top:1px solid rgba(237,237,234,.11);
+             font-size:9px; color:var(--ink-dim); display:flex; justify-content:space-between; }
+
+  .arch { border:1px solid var(--plate-edge); padding:9px 11px; }
+  .arch.close { animation:circuit-close 280ms cubic-bezier(.16,1,.3,1); }
+  .arch .h { font-size:9px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-dim);
+             margin-bottom:6px; display:flex; justify-content:space-between; }
+  .arch .h b { color:var(--ink-idle); font-weight:400; letter-spacing:.10em; }
+  .arch .out { color:var(--ink-dim); font-size:9.5px; overflow-wrap:anywhere; }
+  .arch .incident { margin-top:6px; color:var(--ink-idle); font-size:9px; line-height:1.5;
+                    overflow-wrap:anywhere; }
+
+  .key { display:flex; gap:16px; font-size:9.5px; color:#8E8E88; margin:18px 0 0; flex-wrap:wrap; letter-spacing:.05em; }
+  .key i { display:inline-block; width:9px; height:9px; margin-right:5px; vertical-align:-1px; }
+  .rules { max-width:74ch; margin:22px 0 0; font-size:10px; line-height:1.75; }
+  .rules b { color:#EDEDEA; font-weight:400; }
+
+  .motion-note { max-width:74ch; margin:16px 0 0; padding-top:14px;
+                 border-top:1px solid rgba(237,237,234,.14); font-size:10px; line-height:1.75; }
+  .motion-note b { color:var(--ink); font-weight:400; }
+
+  @keyframes key-strike {
+    0% { transform:translateY(0); }
+    36% { transform:translateY(1px); border-color:rgba(237,237,234,.62); }
+    100% { transform:translateY(0); }
+  }
+  @keyframes dispatch-cut {
+    0% { left:-1px; opacity:0; }
+    18% { opacity:1; }
+    100% { left:100%; opacity:0; }
+  }
+  @keyframes criteria-cut {
+    0% { clip-path:inset(0 100% 0 0); }
+    100% { clip-path:inset(0 0 0 0); }
+  }
+  @keyframes slot-fire {
+    0% { transform:translateX(var(--fan-x)); clip-path:inset(0 50% 0 50%); }
+    100% { transform:translateX(0); clip-path:inset(0 0 0 0); }
+  }
+  @keyframes slot-seat {
+    0% { transform:translateY(-2px); border-color:rgba(237,237,234,.62); }
+    100% { transform:translateY(0); border-color:var(--plate-edge); }
+  }
+  @keyframes circuit-close {
+    0% { clip-path:inset(0 0 100% 0); transform:translateY(-4px); }
+    100% { clip-path:inset(0 0 0 0); transform:translateY(0); }
+  }
+
+  @media (prefers-reduced-motion:reduce) {
+    .b { transition:none; }
+    .ask.fire, .ask.fire::after, .crit.lock, .cd.fire, .cd.seat, .arch.close { animation:none; }
+    .b:active:not(:disabled) { transform:none; }
+  }
+
+  @media (max-width:900px) {
+    body { padding:16px; }
+    .qf { display:block; }
+    .sd { width:auto; border-right:0; border-bottom:1px solid rgba(237,237,234,.14); }
+    .slots { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  }
+</style>
+</head>
+<body>
+
+<h1>Question fan plate</h1>
+<p class="meta">
+  Decided design, 2026-08-31. Layer-1 instrument plate for the question fan — the first half of the
+  console fusion work. Recorded by ADR 0007 and 0012–0014; see
+  <a href="../plans/2026-08-27-console-hub.md">the console hub plan</a>.
+  Cascadia Mono and Anybody fall back to system faces in this file only.
+  Hardening study: choose a rehearsal, focus <b>Ask</b>, and press Enter. Stop and close cut pending
+  work immediately; failures preserve valid answers and expose a bounded recovery action.
+</p>
+<p class="meta">
+  <b>Amended 2026-08-31</b> after the S6 grilling session. Three companion studies carry states this
+  rehearsal does not animate:
+  <a href="2026-08-31-criteria-gate.html">the criteria gate</a> (the run holds between the criteria turn
+  and the workers) and <a href="2026-08-31-slot-count.html">slot count</a> (ghost card adds, a card-header
+  <b>&times;</b> removes, both only while idle, 2-5 shown by controls appearing and vanishing).
+  Also settled here: criteria may be typed by the user, drafted by the criteria slot, or skipped;
+  slot model and effort are edited on the card itself while idle and frozen once running; a finished
+  card keeps its scrollback until the plate closes, and that scrollback is not written to the
+  architect's document. Presets were dropped - the arrangement persists on its own.
+</p>
+
+<div class="qf">
+  <div class="tick"></div>
+  <div class="hd"><span>Question fan</span><span class="st" role="status" aria-live="polite">▮▮▮▮ RUN 1m04 · 2 of 4 in · 31.5k</span></div>
+
+  <div class="sd">
+    <div class="g">Fan</div>
+    <button class="b off" id="run-state" disabled>Running</button>
+    <label class="scenario-label" for="scenario">Rehearse</label>
+    <select class="scenario" id="scenario">
+      <option value="complete">Complete run</option>
+      <option value="worker-crash">One slot crashes</option>
+      <option value="quota">Quota exhausted</option>
+      <option value="malformed">Malformed stream</option>
+      <option value="architect-failure">Architect fails</option>
+      <option value="shutdown">App shuts down</option>
+      <option value="stale-restore">Restore stale run</option>
+    </select>
+    <button class="b" id="stop-fan">Stop</button>
+    <button class="b" id="retry-fan" disabled>Retry failed work</button>
+    <button class="b" id="close-fan">Close plate</button>
+    <button class="b off" disabled title="Build fans arrive in phase 2">Promote to build</button>
+
+    <div class="g s2">Slots</div>
+    <div class="sl"><span class="swatch" style="background:var(--slot-anthropic)"></span><span class="nm">opus</span><span class="ef">▮▮▮▯</span></div>
+    <div class="sl"><span class="swatch" style="background:var(--slot-openai)"></span><span class="nm">terra</span><span class="ef">▮▮▯▯</span></div>
+    <div class="sl"><span class="swatch" style="background:var(--slot-google)"></span><span class="nm">gemini</span><span class="ef">▮▮▯▯</span></div>
+    <div class="sl"><span class="swatch" style="background:var(--slot-anthropic)"></span><span class="nm">sonnet</span><span class="ef">▮▮▯▯</span></div>
+
+    <div class="g s2">Skills</div>
+    <button class="b">/grill-with-docs <span class="cx">▾</span></button>
+    <button class="b">/to-spec <span class="cx">▾</span></button>
+    <button class="b">/to-tickets <span class="cx">▾</span></button>
+    <button class="b">/implement <span class="cx">▾</span></button>
+    <button class="b">/code-review <span class="cx">▾</span></button>
+  </div>
+
+  <div class="mn">
+    <div class="ask" id="ask" role="button" tabindex="0" aria-label="Press Enter to fire the question fan motion study">
+      <div class="h"><span>Ask</span><b>sent 1m04 ago · ⏎ fired it</b></div>
+      <div class="txt">Should a harnessed console get its own git worktree, or share the checkout behind a lock?</div>
+    </div>
+    <p class="verb">↳ verbatim to 4 slots — no rewrite, no architect pre-digest</p>
+
+    <div class="crit" id="criteria">
+      <div class="h"><span>Acceptance criteria</span><b>written before any answer</b></div>
+      <ol>
+        <li>Names the failure mode that makes the other option wrong</li>
+        <li>States the cost per round, with the arithmetic</li>
+        <li>Says what it gives up, not only what it gains</li>
+        <li>Cites something in this repo, not a general claim</li>
+      </ol>
+    </div>
+
+    <div class="slots">
+      <div class="cd" style="--fan-x:18px"><div class="cap" style="background:var(--slot-anthropic)"></div><div class="in">
+        <div class="nm"><span>opus</span><em>anthropic</em></div><div class="ef">▮▮▮▯ HIGH</div>
+        <div class="s done">▮▮▮▮ DONE 48s</div>
+        <div class="strm">Worktrees remove the mutex entirely — the lease only guarded one path, so four checkouts never contend…</div>
+      </div><div class="bar"><span>91 tps</span><span>14.2k</span></div></div>
+
+      <div class="cd" style="--fan-x:6px"><div class="cap" style="background:var(--slot-openai)"></div><div class="in">
+        <div class="nm"><span>terra</span><em>openai</em></div><div class="ef">▮▮▯▯ MED</div>
+        <div class="s done">▮▮▮▮ DONE 1m02</div>
+        <div class="strm">Disagrees on cost. Four worktrees is four installs and four cold type-check passes before any…</div>
+      </div><div class="bar"><span>64 tps</span><span>11.8k</span></div></div>
+
+      <div class="cd" style="--fan-x:-6px"><div class="cap" style="background:var(--slot-google)"></div><div class="in">
+        <div class="nm"><span>gemini</span><em>google</em></div><div class="ef">▮▮▯▯ MED</div>
+        <div class="s run">▮▮▮▮ RUN 1m04</div>
+        <div class="strm">…pruning matters more than creation, because a crash leaves worktrees git still tracks</div>
+      </div><div class="bar"><span>77 tps</span><span>9.1k</span></div></div>
+
+      <div class="cd" style="--fan-x:-18px"><div class="cap" style="background:var(--slot-anthropic)"></div><div class="in">
+        <div class="nm"><span>sonnet</span><em>anthropic</em></div><div class="ef">▮▮▯▯ MED</div>
+        <div class="s run">▮▮▮▮ RUN 1m04</div>
+        <div class="strm">The question assumes isolation is free. On Windows, `git worktree add` against a repo this size…</div>
+      </div><div class="bar"><span>112 tps</span><span>6.4k</span></div></div>
+    </div>
+
+    <div class="arch" id="architect">
+      <div class="h"><span>Architect · scope DOCS</span><b>▯▯▯▯ IDLE — waits for all four</b></div>
+      <div class="out">→ docs/plans/2026-08-31-console-fusion.md</div>
+      <div class="incident" id="incident" aria-live="polite">No incident. Comparison requires at least two valid answers.</div>
+    </div>
+  </div>
+</div>
+
+<div class="key">
+  <span><i style="background:#C8785C"></i>Anthropic</span>
+  <span><i style="background:#4FA88B"></i>OpenAI</span>
+  <span><i style="background:#6E97D8"></i>Google</span>
+  <span><i style="background:#9B87C4"></i>spare</span>
+  <span>· one mid-luminance band, the rule the cluster palette already follows · hex values are approximations pending each vendor's real palette</span>
+</div>
+
+<p class="rules">
+  <b>What this fixes.</b>
+  Sidebar is docked left: fan controls, then slots, then the existing <code>skills[]</code> registry rendered
+  unchanged — one registry, two presentations.
+  Reading order down the main column is causal: <b>ask → criteria → four answers → comparison</b>.
+  Enter fires; there is no arm ceremony and no countdown, and Stop is an ordinary control.
+  Criteria are written by a dedicated criteria slot before any worker starts, tool-less - never by the
+  architect, which would grade against a rubric it wrote itself. The ordering guarantee holds regardless of
+  any gate; the run nonetheless <b>holds</b> after the criteria turn so four workers never run against a
+  scheme nobody read (<a href="../adr/0015-the-question-fan-holds-for-a-human.md">ADR 0015</a>,
+  drawn in <a href="2026-08-31-criteria-gate.html">the criteria gate study</a>).
+  Colour carries <b>identity only</b> — a 2px cap on the card, a 3px bar in the sidebar, keyed to vendor rather
+  than slot so two Anthropic slots share a hue and quota pressure reads at a glance.
+  Effort stays achromatic in the existing glyph run, because effort is ordinal and colour encodes ordinal badly.
+  Status stays achromatic. Wires stay achromatic.
+</p>
+
+<p class="motion-note">
+  <b>Motion thesis.</b> One mechanical relay: Ask takes a 1px key strike, criteria cut in from the
+  leading edge, all four answer cards fan from one centre at the same instant, each finished card
+  seats once, and the architect closes the circuit after all four are in. Nothing loops. Vendor hue
+  never animates because it identifies ownership, not status. Buttons travel 1px under pointer
+  pressure; Stop has no eased tail. Reduced motion removes travel but keeps state and causal delay.
+</p>
+
+<p class="motion-note">
+  <b>Hardening thesis.</b> A terminal slot fault cannot hold the merge open. Two or more valid answers
+  may produce a visibly <b>partial advisory comparison</b>; fewer than two cannot compare. Retry runs
+  only failed work, then replaces the partial comparison. Stop, close, and shutdown kill every pending
+  process tree and retain completed output. A restored stale run is evidence, never a live process: it
+  opens interrupted, ignores late events from the old run id, and can only restart as a new run.
+</p>
+
+<script>
+  const fanStatus = document.querySelector(".hd .st");
+  const runState = document.querySelector("#run-state");
+  const scenario = document.querySelector("#scenario");
+  const stopFan = document.querySelector("#stop-fan");
+  const retryFan = document.querySelector("#retry-fan");
+  const closeFan = document.querySelector("#close-fan");
+  const ask = document.querySelector("#ask");
+  const askState = ask.querySelector(".h b");
+  const criteria = document.querySelector("#criteria");
+  const criteriaState = criteria.querySelector(".h b");
+  const criteriaList = criteria.querySelector("ol");
+  const cards = [...document.querySelectorAll(".cd")];
+  const architect = document.querySelector("#architect");
+  const architectState = architect.querySelector(".h b");
+  const incident = document.querySelector("#incident");
+  const timers = new Set();
+  const originalCriteria = criteriaList.innerHTML;
+  const answers = cards.map((card) => ({
+    stream: card.querySelector(".strm").textContent,
+    bar: [...card.querySelectorAll(".bar span")].map((item) => item.textContent)
+  }));
+  let running = false;
+  let runId = 0;
+  let failedSlots = [];
+  let failureTarget = null;
+
+  const workerFaults = {
+    "worker-crash": { index:1, label:"PROCESS CRASH", detail:"Process exited before message_end. Partial stream retained for diagnosis." },
+    quota: { index:2, label:"QUOTA", detail:"Vendor quota exhausted. Retry waits for deliberate user action; no automatic spend." },
+    malformed: { index:3, label:"STREAM INVALID", detail:"Malformed event stream failed closed. Raw output retained; merge will not treat it as an answer." }
+  };
+
+  function later(delay, work) {
+    const scheduledRun = runId;
+    const timer = window.setTimeout(() => {
+      timers.delete(timer);
+      if (scheduledRun !== runId) return;
+      work();
+    }, delay);
+    timers.add(timer);
+  }
+
+  function cancelPendingWork() {
+    timers.forEach(window.clearTimeout);
+    timers.clear();
+  }
+
+  function setRunningControls(isRunning) {
+    stopFan.disabled = !isRunning;
+    scenario.disabled = isRunning;
+  }
+
+  function clearMotionClasses() {
+    ask.classList.remove("fire");
+    criteria.classList.remove("lock");
+    architect.classList.remove("close");
+    cards.forEach((card) => card.classList.remove("fire", "seat"));
+  }
+
+  function resetFan() {
+    cancelPendingWork();
+    running = false;
+    failedSlots = [];
+    failureTarget = null;
+    clearMotionClasses();
+    fanStatus.textContent = "\u25af\u25af\u25af\u25af READY \u00b7 ENTER TO FIRE";
+    runState.textContent = "Ready";
+    setRunningControls(false);
+    retryFan.disabled = true;
+    retryFan.textContent = "Retry failed work";
+    askState.textContent = "focus here \u00b7 \u23ce fires";
+    criteriaState.textContent = "architect writes first";
+    criteriaList.innerHTML = "<li>Checklist is fixed before the answer slots open.</li>";
+    cards.forEach((card) => {
+      const status = card.querySelector(".s");
+      status.className = "s idle";
+      status.textContent = "\u25af\u25af\u25af\u25af IDLE";
+      card.querySelector(".strm").textContent = "Waiting for fixed acceptance criteria.";
+      const metrics = card.querySelectorAll(".bar span");
+      metrics[0].textContent = "\u2014 tps";
+      metrics[1].textContent = "0";
+    });
+    architectState.textContent = "\u25af\u25af\u25af\u25af IDLE \u2014 waits for all four";
+    incident.textContent = "No incident. Comparison requires at least two valid answers.";
+  }
+
+  function seatCard(index, elapsed) {
+    if (!running) return;
+    const card = cards[index];
+    const status = card.querySelector(".s");
+    status.className = "s done";
+    status.textContent = "\u25ae\u25ae\u25ae\u25ae DONE " + elapsed;
+    card.querySelector(".strm").textContent = answers[index].stream;
+    const metrics = card.querySelectorAll(".bar span");
+    metrics[0].textContent = answers[index].bar[0];
+    metrics[1].textContent = answers[index].bar[1];
+    card.classList.remove("seat");
+    void card.offsetWidth;
+    card.classList.add("seat");
+  }
+
+  function failCard(index, label, detail) {
+    if (!running) return;
+    const card = cards[index];
+    const status = card.querySelector(".s");
+    status.className = "s fail";
+    status.textContent = "\u25ae\u25af\u25af\u25af " + label;
+    card.querySelector(".strm").textContent = detail;
+    const metrics = card.querySelectorAll(".bar span");
+    metrics[0].textContent = "\u2014 tps";
+    failedSlots = [index];
+    failureTarget = "worker";
+    incident.textContent = detail + " Valid answers remain available for a partial comparison.";
+  }
+
+  function finishComparison(partial) {
+    running = false;
+    setRunningControls(false);
+    runState.textContent = partial ? "Partial" : "Complete";
+    fanStatus.textContent = partial
+      ? "\u25ae\u25ae\u25ae\u25af PARTIAL \u00b7 3 OF 4 VALID \u00b7 34.8k"
+      : "\u25ae\u25ae\u25ae\u25ae COMPLETE 1m12 \u00b7 4 of 4 in \u00b7 41.5k";
+    architectState.textContent = partial
+      ? "\u25ae\u25ae\u25ae\u25af PARTIAL \u2014 advisory, one answer absent"
+      : "\u25ae\u25ae\u25ae\u25ae DONE \u2014 advisory comparison";
+    if (!partial && failureTarget) {
+      incident.textContent = "Recovery completed. This comparison supersedes the earlier failed or partial result.";
+      retryFan.disabled = true;
+    }
+    if (partial) retryFan.disabled = false;
+    askState.textContent = "complete \u00b7 Enter starts a new run";
+  }
+
+  function beginComparison() {
+    const validCount = cards.filter((card) => card.querySelector(".s").classList.contains("done")).length;
+    if (validCount < 2) {
+      running = false;
+      setRunningControls(false);
+      runState.textContent = "Needs retry";
+      fanStatus.textContent = "\u25ae\u25af\u25af\u25af NO COMPARISON \u00b7 " + validCount + " VALID";
+      architectState.textContent = "\u25af\u25af\u25af\u25af BLOCKED \u2014 needs two valid answers";
+      return;
+    }
+
+    const partial = validCount < cards.length;
+    fanStatus.textContent = partial
+      ? "\u25ae\u25ae\u25ae\u25af PARTIAL MERGE \u00b7 " + validCount + " OF 4 VALID"
+      : "\u25ae\u25ae\u25ae\u25af MERGE \u00b7 4 of 4 in";
+    architectState.textContent = partial
+      ? "\u25ae\u25ae\u25ae\u25af RUN \u2014 scoring surviving answers"
+      : "\u25ae\u25ae\u25ae\u25ae RUN \u2014 scoring fixed criteria";
+    architect.classList.add("close");
+
+    later(800, () => {
+      if (scenario.value === "architect-failure" && failureTarget !== "architect-retry") {
+        running = false;
+        setRunningControls(false);
+        runState.textContent = "Architect failed";
+        fanStatus.textContent = "\u25ae\u25ae\u25ae\u25af ARCHITECT FAILED \u00b7 4 ANSWERS SAFE";
+        architectState.textContent = "\u25ae\u25af\u25af\u25af FAILED \u2014 document not written";
+        incident.textContent = "Architect exited before a valid document completed. All answers and fixed criteria are retained.";
+        failureTarget = "architect";
+        retryFan.disabled = false;
+        return;
+      }
+      finishComparison(partial);
+    });
+  }
+
+  function fireFan() {
+    if (running) return;
+    resetFan();
+    runId += 1;
+    if (scenario.value === "stale-restore") {
+      restoreStaleRun();
+      return;
+    }
+    running = true;
+    setRunningControls(true);
+    runState.textContent = "Running";
+    askState.textContent = "sent now \u00b7 \u23ce fired it";
+    fanStatus.textContent = "\u25ae\u25af\u25af\u25af CRITERIA \u00b7 0 of 4 in";
+    ask.classList.add("fire");
+    criteriaState.textContent = "WRITING \u2014 before any answer";
+    criteriaList.innerHTML = "<li>Architect is fixing the checklist\u2026</li>";
+
+    later(900, () => {
+      criteriaList.innerHTML = originalCriteria;
+      criteriaState.textContent = "LOCKED \u2014 before any answer";
+      criteria.classList.add("lock");
+    });
+
+    later(1250, () => {
+      fanStatus.textContent = "\u25ae\u25ae\u25af\u25af RUN 0m01 \u00b7 0 of 4 in";
+      cards.forEach((card) => {
+        const status = card.querySelector(".s");
+        status.className = "s run";
+        status.textContent = "\u25ae\u25ae\u25ae\u25ae RUN 0m01";
+        card.querySelector(".strm").textContent = "Structured events arriving\u2026";
+        card.classList.add("fire");
+      });
+    });
+
+    later(2600, () => {
+      seatCard(0, "48s");
+      fanStatus.textContent = "\u25ae\u25ae\u25af\u25af RUN 0m48 \u00b7 1 of 4 in";
+    });
+    later(3200, () => {
+      if (scenario.value === "worker-crash") {
+        const fault = workerFaults[scenario.value];
+        failCard(fault.index, fault.label, fault.detail);
+      } else {
+        seatCard(1, "1m02");
+      }
+      fanStatus.textContent = "\u25ae\u25ae\u25af\u25af RUN 1m02 \u00b7 2 of 4 in";
+    });
+    later(3800, () => {
+      if (scenario.value === "quota") {
+        const fault = workerFaults[scenario.value];
+        failCard(fault.index, fault.label, fault.detail);
+      } else {
+        seatCard(2, "1m04");
+      }
+      fanStatus.textContent = "\u25ae\u25ae\u25af\u25af RUN 1m04 \u00b7 3 of 4 in";
+    });
+    if (scenario.value === "shutdown") {
+      later(3450, () => interruptFan("SHUTDOWN"));
+    }
+    later(4300, () => {
+      if (scenario.value === "malformed") {
+        const fault = workerFaults[scenario.value];
+        failCard(fault.index, fault.label, fault.detail);
+      } else {
+        seatCard(3, "1m09");
+      }
+      beginComparison();
+    });
+  }
+
+  function interruptFan(reason) {
+    if (!running) return;
+    cancelPendingWork();
+    runId += 1;
+    running = false;
+    clearMotionClasses();
+    setRunningControls(false);
+    retryFan.disabled = true;
+    const completed = cards.filter((card) => card.querySelector(".s").classList.contains("done")).length;
+    runState.textContent = reason === "STOPPED" ? "Stopped" : "Interrupted";
+    fanStatus.textContent = "\u25ae\u25af\u25af\u25af " + reason + " \u00b7 " + completed + " OF 4 SAVED";
+    askState.textContent = reason.toLowerCase() + " \u00b7 Enter starts a new run";
+    cards.forEach((card) => {
+      const status = card.querySelector(".s");
+      if (!status.classList.contains("done")) {
+        status.className = "s idle";
+        status.textContent = "\u25ae\u25af\u25af\u25af " + reason;
+      }
+    });
+    architectState.textContent = "\u25af\u25af\u25af\u25af IDLE \u2014 no comparison after interruption";
+    incident.textContent = completed + " completed answer" + (completed === 1 ? "" : "s") +
+      " retained. Pending process trees were killed; restart creates a new run id.";
+  }
+
+  function stopImmediately() {
+    interruptFan("STOPPED");
+  }
+
+  function restoreStaleRun() {
+    running = true;
+    seatCard(0, "48s");
+    seatCard(1, "1m02");
+    running = false;
+    cards.slice(2).forEach((card) => {
+      const status = card.querySelector(".s");
+      status.className = "s idle";
+      status.textContent = "\u25ae\u25af\u25af\u25af INTERRUPTED";
+      card.querySelector(".strm").textContent = "No live process. Last durable stream position retained.";
+    });
+    runState.textContent = "Interrupted";
+    fanStatus.textContent = "\u25ae\u25af\u25af\u25af STALE RUN \u00b7 2 OF 4 SAVED";
+    askState.textContent = "restored snapshot \u00b7 restart creates a new run";
+    architectState.textContent = "\u25af\u25af\u25af\u25af BLOCKED \u2014 stale runs never resume blindly";
+    incident.textContent = "Cockpit found no live process for the saved run. Late events with its old run id are ignored.";
+    failureTarget = "stale";
+    retryFan.textContent = "Restart as new run";
+    retryFan.disabled = false;
+  }
+
+  function retryFailedWork() {
+    if (running || retryFan.disabled) return;
+    if (failureTarget === "stale") {
+      scenario.value = "complete";
+      fireFan();
+      return;
+    }
+
+    runId += 1;
+    running = true;
+    setRunningControls(true);
+    retryFan.disabled = true;
+
+    if (failureTarget === "architect") {
+      failureTarget = "architect-retry";
+      incident.textContent = "Retrying only the architect from the same fixed criteria and four retained answers.";
+      beginComparison();
+      return;
+    }
+
+    const index = failedSlots[0];
+    const card = cards[index];
+    const status = card.querySelector(".s");
+    status.className = "s run";
+    status.textContent = "\u25ae\u25ae\u25ae\u25ae RETRY";
+    card.querySelector(".strm").textContent = "Fresh process; previous partial stream is not reused as an answer.";
+    runState.textContent = "Retrying";
+    fanStatus.textContent = "\u25ae\u25ae\u25af\u25af RETRY \u00b7 3 ANSWERS RETAINED";
+    incident.textContent = "Retrying only the failed slot. Completed answers are not spent twice.";
+    later(1100, () => {
+      seatCard(index, "36s retry");
+      failedSlots = [];
+      failureTarget = "worker-recovered";
+      beginComparison();
+    });
+  }
+
+  ask.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    fireFan();
+  });
+  stopFan.addEventListener("click", stopImmediately);
+  retryFan.addEventListener("click", retryFailedWork);
+  closeFan.addEventListener("click", () => interruptFan("CLOSED"));
+  resetFan();
+</script>
+</body>
+</html>

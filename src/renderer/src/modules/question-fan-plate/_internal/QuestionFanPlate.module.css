@@ -1,0 +1,269 @@
+/*
+ * The run, as the Hub stage's single column: run head, stage strip, the
+ * Orchestrator terminal, then the worker streams beneath it. The Ask box and the
+ * Delegation panel are gone - the terminal is the only place a task is framed
+ * (ADR 0049), and three surfaces describing one task was the duplication it
+ * removed.
+ *
+ * It used to be a bordered plate with its own left sidebar carrying Fan
+ * controls, the Stack and the skills registry. The Stack is app-wide now and
+ * lives in the Hub's aside (ADR 0030), and skills belong to `rest`, so the
+ * column has one reading order and the lineup is not drawn twice.
+ */
+.plate {
+  position: relative;
+  z-index: 1;
+  max-width: none;
+  margin: 0 auto;
+  color: var(--ink);
+  font-family: var(--font-display);
+}
+
+.setup { margin: 0 0 10px; color: var(--ink-muted); font: 8px var(--font-data); letter-spacing: .08em; text-transform: uppercase; }
+.setup summary {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: max-content;
+  padding: 6px 10px;
+  background: var(--plate);
+  border: 1px solid var(--rule);
+  clip-path: var(--chamfer);
+  cursor: pointer;
+  list-style: none;
+}
+.setup summary::-webkit-details-marker { display: none; }
+.setup summary:hover, .setup summary:focus-visible { color: var(--ink); background: color-mix(in srgb, var(--ink) 6%, transparent); border-color: var(--ink); outline: 0; }
+.setupIcon { font-size: 10px; color: var(--ink-muted); }
+.setupBody { display: grid; gap: 8px; margin-top: 6px; padding: 10px 12px; background: var(--plate); border: 1px solid var(--rule); clip-path: var(--chamfer); }
+.recipeSelect { width: max-content; padding: 4px 5px; color: var(--ink-secondary); background: var(--page); border: 1px solid var(--rule); font: 7px var(--font-data); letter-spacing: .06em; text-transform: uppercase; }
+.recipeSelect:focus-visible { border-color: var(--ink); outline: 0; }
+.setupSlot { display: grid; grid-template-columns: 44px repeat(3, minmax(0, 1fr)) auto; gap: 5px; align-items: center; }
+.setupSlot > span { color: var(--ink-secondary); font-weight: 750; }
+.setupSlot button, .setupAction { padding: 4px 6px; color: var(--ink-secondary); background: transparent; border: 1px solid var(--rule); font: 7px var(--font-data); letter-spacing: .08em; text-transform: uppercase; cursor: pointer; }
+.setupSlot button:hover, .setupSlot button:focus-visible, .setupAction:hover, .setupAction:focus-visible { color: var(--ink); border-color: var(--ink); outline: 0; }
+
+.head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: start;
+  margin-bottom: 11px;
+}
+
+.recipeHeading { display: flex; align-items: center; gap: 9px; }
+
+.recipeHeading h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 720;
+  letter-spacing: -.01em;
+}
+
+.badge {
+  padding: 3px 6px;
+  color: var(--ink-secondary);
+  border: 1px solid var(--rule);
+  font: 8px var(--font-data);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.desc { margin: 4px 0 0; max-width: 62ch; color: var(--ink-muted); font-size: 10px; }
+.status { color: var(--ink-muted); font: 8px var(--font-data); letter-spacing: .06em; white-space: nowrap; }
+
+.run { display: block; }
+
+/* The terminal is the column's one full-width surface: it frames the task, and
+   the worker row reads directly beneath it. */
+.terminalSlot { margin: 0 0 9px; }
+
+/* The workers' own heading, from the mockup: how many, which delegation they
+   are answering, and the gate control when there is one. */
+.workersHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  color: var(--ink-muted);
+  font: 8px var(--font-data);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.workersRun { flex: 1; }
+
+.contextRow { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
+
+.contextChip, .workspaceChip {
+  padding: 3px 5px;
+  color: var(--ink-muted);
+  background: transparent;
+  border: 1px solid var(--rule);
+  font: 7px var(--font-data);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+/* The workspace is a chip you can type in. It was a labelled field in the old
+   sidebar; the mockup carries it as run context, which is what it is. */
+.workspaceChip { min-width: 22ch; }
+.workspaceChip:focus-visible { color: var(--ink); border-color: var(--ink); outline: 0; }
+.workspaceChip::placeholder { color: var(--ink-muted); }
+
+.workspaceError { display: block; margin-top: 5px; color: var(--defect); font: 8px var(--font-data); }
+
+/* The one filled control on the surface. The run is the Hub's visual peak, and
+   this is what starts and stops it. */
+.runButton {
+  padding: 7px 11px;
+  color: var(--page);
+  background: var(--ink);
+  border: 1px solid var(--ink);
+  font-size: 8px;
+  font-weight: 750;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  clip-path: var(--chamfer);
+}
+
+.runButton:disabled { color: var(--ink-muted); background: transparent; border-color: var(--rule); cursor: not-allowed; }
+
+.unavailable {
+  margin: 0 0 9px;
+  padding: 9px 11px;
+  color: var(--ink-secondary);
+  border: 1px solid var(--rule);
+  font: 9px var(--font-data);
+}
+
+/*
+ * One continuous ruled strip, with the current stage inverted. DESIGN.md is
+ * explicit that these are a strip and not progress dots: a stage is a named
+ * step in the Recipe's choreography, not a fraction of a bar.
+ */
+.pipelineBar {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: stretch;
+  margin-bottom: 10px;
+  background: var(--plate);
+  border: 1px solid var(--rule);
+  clip-path: var(--chamfer);
+}
+
+.recipeMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-right: 1px solid var(--rule);
+}
+
+.recipeTitle {
+  font: 10px var(--font-display);
+  font-weight: 750;
+  letter-spacing: .06em;
+  color: var(--ink);
+  text-transform: uppercase;
+}
+
+.recipeBadge {
+  padding: 2px 5px;
+  color: var(--ink-muted);
+  border: 1px solid var(--rule);
+  font: 7px var(--font-data);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.unbuiltTag {
+  padding: 2px 5px;
+  color: var(--ink-secondary);
+  border: 1px solid color-mix(in srgb, var(--ink) 25%, transparent);
+  font: 7px var(--font-data);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  background: color-mix(in srgb, var(--ink) 5%, transparent);
+}
+
+.stages {
+  display: grid;
+  grid-auto-columns: 1fr;
+  grid-auto-flow: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-right: 1px solid var(--rule);
+  color: var(--ink-muted);
+  font: 8px var(--font-data);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.stageIndex {
+  color: var(--ink-muted);
+  font-size: 7px;
+}
+
+.stage:last-child { border-right: 0; }
+.active { color: var(--page); background: var(--ink); font-weight: 750; }
+.active .stageIndex { color: var(--page); }
+
+/* Causal Bus: mechanical trace connecting Orchestrator to workers */
+.causalBus {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: -5px 0 6px 0;
+  pointer-events: none;
+}
+
+.busTrunk {
+  width: 1px;
+  height: 8px;
+  background: var(--rule);
+}
+
+.busBranches {
+  display: flex;
+  width: 90%;
+  justify-content: space-around;
+  border-top: 1px solid var(--rule);
+  position: relative;
+}
+
+.busNode {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.busPin {
+  width: 5px;
+  height: 5px;
+  background: var(--page);
+  border: 1px solid var(--rule);
+  transform: rotate(45deg);
+  margin-top: -3px;
+}
+
+.busWire {
+  width: 1px;
+  height: 6px;
+  background: var(--rule);
+}
+
+/* The run's own comment on itself, once it has closed. */
+.notice { margin: 9px 0 0; color: var(--ink-muted); font: 9px var(--font-data); }

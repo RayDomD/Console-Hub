@@ -1,0 +1,53 @@
+@import './assets/fonts/fonts.css';
+
+:root {
+  --font-display: 'Anybody', system-ui, sans-serif;
+  --font-data: 'Cascadia Mono', ui-monospace, Consolas, monospace;
+  --page: #0a0a0b;
+  --ink: #ededea;
+  --ink-muted: #8e8e88;
+  --ink-secondary: #c4c4be;
+  --dim: #83837d;
+  --plate: rgba(6, 6, 7, 0.88);
+  --rule: rgba(237, 237, 234, 0.14);
+  --defect: #b24545;
+  --agent-codex: #5aa9f0;
+  --agent-claude: #f0871f;
+  --agent-agy: #c9a2f0, #5aa9f0, #3fd0c8, #7be38c, #f0d24a, #f0871f, #e86fd0;
+  --hair: rgba(237, 237, 234, 0.22);
+  --chamfer: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body, #root, [data-verify="app-root"] { height: 100%; }
+body {
+  background: var(--page);
+  color: var(--ink);
+  font-family: var(--font-display);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  color-scheme: dark;
+}
+option { background: var(--page); color: var(--ink); }
+::selection { background: rgba(237, 237, 234, 0.22); color: var(--ink); }
+
+.launchHandoff {
+  position: fixed;
+  z-index: 20;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: min(90vw, 900px);
+  padding: 12px;
+  border: 1px solid var(--hair);
+  background: var(--page);
+  clip-path: var(--chamfer);
+  font: 11px var(--font-data);
+}
+
+.launchHandoff span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.launchHandoff button { background: transparent; color: var(--ink); border: 1px solid var(--hair); padding: 6px 9px; font: inherit; cursor: pointer; }
+.launchHandoff button:hover, .launchHandoff button:focus-visible { background: var(--ink); color: var(--page); }

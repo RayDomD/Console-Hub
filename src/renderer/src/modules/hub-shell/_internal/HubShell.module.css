@@ -1,0 +1,489 @@
+/*
+ * The Hub's three instruments: a compact Navigator door, the active stage, and
+ * the Live Stack. The Navigator follows Atlas's compact door-plate language so
+ * choosing a Recipe never consumes more space than the work it opens.
+ */
+.hub {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  /* Both side tracks are the user's, set by the handles on the column rules. The
+     stage takes what is left, so it is the track that gives. */
+  grid-template-columns:
+    var(--navigator-width, 264px) auto minmax(0, 1fr) auto var(--stack-width, 286px);
+  min-height: 0;
+  color: var(--ink);
+  background: var(--page);
+  font-family: var(--font-display);
+  pointer-events: auto;
+}
+
+.navigator {
+  min-width: 0;
+  padding: 16px 14px;
+  background: var(--page);
+}
+
+/*
+ * The column rule itself, widened into something you can catch. 5px is the whole
+ * target: any wider and it reads as a gutter rather than as the edge of a pane.
+ */
+.paneHandle {
+  width: 5px;
+  background: var(--rule);
+  cursor: col-resize;
+  touch-action: none;
+}
+
+.paneHandle:hover, .paneHandle:focus-visible {
+  background: var(--ink-muted);
+  outline: none;
+}
+
+.navigatorFrame {
+  display: grid;
+  grid-template-rows: auto auto auto minmax(0, 1fr);
+  height: 100%;
+  border: 1px solid var(--hair);
+  clip-path: var(--chamfer);
+}
+
+.navigatorHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 11px;
+  color: var(--ink-muted);
+  border-bottom: 1px solid var(--rule);
+  font: 8px var(--font-data);
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.navigatorHead svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-width: 1.4; }
+.routeList { display: grid; gap: 5px; padding: 10px; border-bottom: 1px solid var(--rule); }
+
+.route, .routeActive {
+  display: flex;
+  width: 100%;
+  min-height: 34px;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px;
+  color: var(--ink-secondary);
+  text-align: left;
+  background: transparent;
+  border: 1px solid var(--rule);
+  border-left: 3px solid transparent;
+  font-family: var(--font-data);
+  cursor: pointer;
+}
+
+.route span, .routeActive span { font-size: 9px; letter-spacing: .05em; }
+.route i, .routeActive i { color: var(--ink-muted); font-size: 7px; font-style: normal; letter-spacing: .08em; text-transform: uppercase; }
+.route:hover:not(:disabled), .route:focus-visible {
+  color: var(--ink);
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+  border-color: color-mix(in srgb, var(--ink) 25%, transparent);
+  border-left-color: var(--ink-muted);
+  outline: 0;
+}
+.route:hover:not(:disabled) i, .route:focus-visible i { color: var(--ink-secondary); }
+.routeActive {
+  color: var(--ink);
+  background: color-mix(in srgb, var(--ink) 8%, transparent);
+  border-color: color-mix(in srgb, var(--ink) 30%, transparent);
+  border-left: 3px solid var(--ink);
+}
+.routeActive span { font-weight: 750; color: var(--ink); }
+.routeActive i { color: var(--ink); }
+.route:disabled { color: var(--ink-muted); cursor: not-allowed; }
+
+.workspaceTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 9px;
+  color: var(--ink-muted);
+  font: 8px var(--font-data);
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+
+.workspaceBadge {
+  font: 7px var(--font-data);
+  color: var(--ink-muted);
+  border: 1px solid var(--rule);
+  padding: 1px 4px;
+  letter-spacing: .08em;
+}
+
+/* --page, not --plate: --plate is 88% opaque, which is right for a plate sitting
+   on the field and wrong for a surface that replaces it. At 88% the rest chrome
+   read straight through. */
+.rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 0;
+  background: var(--page);
+  border-right: 1px solid var(--rule);
+}
+
+.railSpacer { flex: 1; }
+
+.railButton, .railButtonActive {
+  position: relative;
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  color: var(--ink-muted);
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.railButton:hover, .railButtonActive:hover,
+.railButton:focus-visible, .railButtonActive:focus-visible {
+  color: var(--ink);
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+  outline: 0;
+}
+
+.railButtonActive {
+  color: var(--ink);
+  background: color-mix(in srgb, var(--ink) 10%, transparent);
+  border-color: var(--rule);
+}
+
+/* Selection is a bar, not a colour: the shell is achromatic and state reads as
+   form plus label. */
+.railButtonActive::before {
+  content: '';
+  position: absolute;
+  left: -1px;
+  top: 6px;
+  bottom: 6px;
+  border-left: 2px solid var(--ink);
+}
+
+.railButton:disabled { color: var(--ink-muted); cursor: not-allowed; }
+.railButton:disabled:hover { color: var(--ink-muted); background: transparent; }
+
+.railButton svg, .railButtonActive svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+}
+
+/* The rail is icon-only, so this tooltip is where a Recipe's name, its guarantee
+   and the reason it cannot run are actually read. */
+.tip {
+  position: absolute;
+  left: 46px;
+  top: 4px;
+  z-index: 20;
+  display: none;
+  padding: 7px 9px;
+  color: var(--ink);
+  background: var(--page);
+  border: 1px solid var(--rule);
+  font: 8px/1.5 var(--font-data);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.railButton:hover .tip, .railButtonActive:hover .tip,
+.railButton:focus-visible .tip, .railButtonActive:focus-visible .tip { display: block; }
+
+.tip b { display: block; font: 8px var(--font-data); font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
+.tip small { display: block; margin-top: 3px; color: var(--ink-muted); font: 7px var(--font-data); }
+
+.explorer {
+  display: grid;
+  grid-template-rows: 38px auto minmax(0, 1fr);
+  min-height: 0;
+  background: var(--page);
+  border-right: 1px solid var(--rule);
+}
+
+.explorerTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 11px;
+  border-bottom: 1px solid var(--rule);
+  font-size: 9px;
+  font-weight: 720;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+
+.returnButton {
+  color: var(--ink-muted);
+  background: transparent;
+  border: 1px solid var(--rule);
+  font: 8px var(--font-data);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  clip-path: var(--chamfer);
+}
+
+.returnButton { padding: 5px 7px; }
+
+.returnButton:hover, .returnButton:focus-visible {
+  color: var(--page);
+  background: var(--ink);
+  border-color: var(--ink);
+  outline: 0;
+}
+
+.workspace { padding: 11px; border-bottom: 1px solid var(--rule); background: var(--page); }
+.workspace strong { display: block; font-size: 10px; font-weight: 750; letter-spacing: .09em; text-transform: uppercase; }
+.workspace span { display: block; margin-top: 4px; overflow: hidden; color: var(--ink-muted); font: 8px var(--font-data); text-overflow: ellipsis; white-space: nowrap; }
+
+.tree { min-height: 0; overflow: auto; padding: 6px 0 18px; font-family: var(--font-data); }
+
+.treeRow, .treeRowSelected {
+  display: flex;
+  width: 100%;
+  height: 24px;
+  align-items: center;
+  gap: 5px;
+  padding-right: 8px;
+  color: var(--ink-secondary);
+  text-align: left;
+  background: transparent;
+  border: 0;
+  font: 9px var(--font-data);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.treeRow:hover, .treeRow:focus-visible { background: color-mix(in srgb, var(--ink) 6%, transparent); outline: 0; }
+.treeRowSelected { color: var(--ink); background: color-mix(in srgb, var(--ink) 12%, transparent); }
+
+.twisty, .twistyOpen {
+  width: 10px; height: 10px; flex: none;
+  fill: none; stroke: currentColor; stroke-width: 1.4;
+  color: var(--ink-muted);
+}
+
+.twistyOpen { transform: rotate(90deg); }
+
+/* Folder and file are authored marks, chamfered the way every other corner is. */
+.folder, .file { width: 13px; height: 13px; flex: none; border: 1px solid var(--ink-muted); }
+.folder { clip-path: polygon(0 20%, 42% 20%, 50% 0, 100% 0, 100% 100%, 0 100%); }
+.file { clip-path: polygon(0 0, 70% 0, 100% 30%, 100% 100%, 0 100%); }
+
+.treeName { overflow: hidden; text-overflow: ellipsis; }
+.empty { margin: 0; padding: 0; color: var(--ink-muted); font: 9px/1.5 var(--font-data); }
+
+.emptyCard {
+  margin: 10px;
+  padding: 12px;
+  border: 1px dashed var(--rule);
+  clip-path: var(--chamfer);
+  background: color-mix(in srgb, var(--plate) 60%, transparent);
+}
+
+.emptyGlyph {
+  display: block;
+  color: var(--ink-muted);
+  font: 8px var(--font-data);
+  letter-spacing: .15em;
+  margin-bottom: 6px;
+}
+
+/* The run is the stage's content, not a plate floating over it. As a free plate
+   the stage's own copy painted straight through the run behind it. */
+.stage {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  padding: 16px;
+}
+.stageContent { min-width: 0; }
+.stagePrompt { margin: 0; padding-top: 22vh; color: var(--ink-muted); font: 10px var(--font-data); text-align: center; }
+
+.aside { min-height: 0; overflow: auto; background: var(--page); }
+.asideSection { padding: 13px; border-bottom: 1px solid var(--rule); }
+
+.asideHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 9px;
+  font-size: 9px;
+  font-weight: 720;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.asideHead span { color: var(--ink-muted); font: 7px var(--font-data); letter-spacing: .08em; }
+
+.stackSlot {
+  position: relative;
+  margin-bottom: 8px;
+  padding: 10px 10px 9px 12px;
+  border: 1px solid var(--rule);
+  background: var(--plate);
+  clip-path: var(--chamfer);
+}
+
+/* The 2px top rim is the vendor's, per ADR 0048 / DESIGN.md. */
+.stackSlot::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 2px; }
+.claude::before { background: var(--agent-claude); }
+.stackButton {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: var(--ink);
+  cursor: pointer;
+}
+.stackButton span { display: block; }
+.stackButton:hover { border-color: var(--ink); }
+.stackButton:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.codex::before { background: var(--agent-codex); }
+.agy::before { background: linear-gradient(90deg, var(--agent-agy)); }
+
+.stackSlot.claude { background: color-mix(in srgb, var(--agent-claude) 8%, var(--plate)); }
+.stackSlot.codex { background: color-mix(in srgb, var(--agent-codex) 8%, var(--plate)); }
+.stackSlot.agy { background: color-mix(in srgb, #C9A2F0 8%, var(--plate)); }
+
+.stackHead { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 7px; align-items: baseline; }
+.stackName { font-size: 9px; font-weight: 750; letter-spacing: .09em; text-transform: uppercase; color: var(--ink); }
+.role { margin-top: 3px; color: var(--ink-muted); font: 7px var(--font-data); letter-spacing: .08em; text-transform: uppercase; }
+.effort { font: 7.5px var(--font-data); color: var(--ink-secondary); }
+.stackModel { margin-top: 6px; overflow: hidden; color: var(--ink-muted); font: 8px var(--font-data); text-overflow: ellipsis; white-space: nowrap; }
+
+/* Scrolling belongs to the instrument surface too: a square, quiet track and a
+   legible thumb make the remaining distance visible without borrowing colour. */
+.tree, .stage, .aside {
+  overscroll-behavior: contain;
+  scrollbar-color: var(--ink-muted) transparent;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+}
+
+.tree::-webkit-scrollbar, .stage::-webkit-scrollbar, .aside::-webkit-scrollbar { width: 10px; height: 10px; }
+.tree::-webkit-scrollbar-track, .stage::-webkit-scrollbar-track, .aside::-webkit-scrollbar-track { background: transparent; }
+.tree::-webkit-scrollbar-thumb, .stage::-webkit-scrollbar-thumb, .aside::-webkit-scrollbar-thumb {
+  background: var(--ink-muted);
+  border: 3px solid var(--page);
+  background-clip: padding-box;
+  border-radius: 0;
+}
+.tree::-webkit-scrollbar-thumb:hover, .stage::-webkit-scrollbar-thumb:hover, .aside::-webkit-scrollbar-thumb:hover { background: var(--ink); }
+
+.zoomControls {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: flex;
+  width: max-content;
+  align-items: center;
+  justify-self: end;
+  margin-left: auto;
+  color: var(--ink-muted);
+  background: var(--page);
+  border: 1px solid var(--rule);
+  clip-path: var(--chamfer);
+}
+
+.zoomControls button {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.zoomControls button + button, .zoomControls output + button { border-left: 1px solid var(--rule); }
+.zoomControls output { min-width: 39px; padding: 0 6px; border-left: 1px solid var(--rule); font: 8px var(--font-data); letter-spacing: .06em; text-align: center; }
+.zoomControls svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.4; }
+.zoomControls button:hover:not(:disabled), .zoomControls button:focus-visible { color: var(--page); background: var(--ink); outline: 0; }
+.zoomControls button:disabled { color: var(--ink-muted); cursor: default; }
+
+.enterPlate {
+  width: 214px;
+  padding: 11px;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--page) 94%, transparent);
+  border: 1px solid var(--hair);
+  clip-path: var(--chamfer);
+}
+
+.enterKicker,
+.enterCopy,
+.enterLaunch,
+.enterLaunch i { font-family: var(--font-data); }
+
+.enterKicker {
+  margin: 0 0 8px;
+  color: var(--ink-muted);
+  font-size: 8px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.enterLaunch {
+  display: flex;
+  width: 100%;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 9px 8px;
+  color: var(--ink);
+  text-align: left;
+  background: transparent;
+  border: 1px solid var(--hair);
+  cursor: pointer;
+}
+
+.enterLaunch span {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-variation-settings: 'wdth' 118, 'wght' 580;
+  letter-spacing: .02em;
+}
+
+.enterLaunch i {
+  color: var(--ink-muted);
+  font-size: 8px;
+  font-style: normal;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.enterLaunch:hover,
+.enterLaunch:focus-visible {
+  color: var(--page);
+  background: var(--ink);
+  border-color: var(--ink);
+  outline: none;
+}
+
+.enterLaunch:hover i,
+.enterLaunch:focus-visible i { color: var(--page); }
+
+.enterCopy {
+  margin: 9px 0 0;
+  color: var(--ink-muted);
+  font-size: 8.5px;
+  line-height: 1.5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hub, .navigator, .treeRow, .route, .routeActive, .returnButton, .enterLaunch { transition: none; animation: none; }
+}

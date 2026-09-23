@@ -1,0 +1,210 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  :root {
+    --page: #0a0a0b;
+    --ink: #ededea;
+    --dim: #83837d;
+    --ink-muted: #8e8e88;
+    --ink-secondary: #c4c4be;
+    --rule: rgba(237,237,234,0.14);
+    --plate: rgba(6,6,7,0.88);
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--page);
+    color: var(--ink);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    margin: 0;
+    padding: 28px 32px 60px;
+  }
+  h1 { font-size: 15px; margin: 0 0 4px; }
+  .lede { color: var(--ink-secondary); font-size: 12px; margin: 0 0 28px; max-width: 760px; line-height: 1.5; }
+  .mono { font-family: 'Cascadia Mono', ui-monospace, Consolas, monospace; }
+  section { margin-bottom: 40px; }
+  section > h2 {
+    font-size: 11px; text-transform: uppercase; letter-spacing: .08em;
+    color: var(--ink); border-bottom: 1px solid var(--rule); padding-bottom: 8px; margin: 0 0 14px;
+  }
+  .swatchRow { display: flex; gap: 18px; margin-bottom: 18px; flex-wrap: wrap; }
+  .swatch {
+    border: 1px solid var(--rule); padding: 10px 14px; min-width: 140px;
+  }
+  .swatch .chip { width: 100%; height: 28px; border: 1px solid var(--rule); margin-bottom: 8px; }
+  .swatch .label { font-size: 10px; color: var(--ink-secondary); }
+  .swatch .hex { font-size: 9px; color: var(--dim); }
+  .swatch .luma { font-size: 9px; color: var(--dim); margin-top: 2px; }
+
+  /* ---- current state repro ---- */
+  .panel {
+    background: #050506; border: 1px solid var(--rule); padding: 16px 18px;
+  }
+  .row { display: flex; align-items: baseline; gap: 14px; padding: 7px 0; border-bottom: 1px solid var(--rule); }
+  .row:last-child { border-bottom: none; }
+  .tag { font: 8px/1 var(--font-data), monospace; letter-spacing: .06em; text-transform: uppercase; padding: 2px 5px; border: 1px solid var(--rule); }
+  .k { font-size: 9px; letter-spacing: .06em; text-transform: uppercase; min-width: 160px; }
+  .note { font-size: 10px; color: var(--dim); flex: 1; }
+
+  .current .k.a { color: var(--ink-muted); }
+  .current .k.b { color: var(--dim); }
+  .current .tag.a { color: var(--ink-muted); }
+  .current .tag.b { color: var(--dim); }
+
+  .callout {
+    margin-top: 10px; font-size: 10.5px; color: var(--ink-secondary);
+    background: color-mix(in srgb, var(--ink) 6%, transparent);
+    border-left: 2px solid var(--dim); padding: 8px 10px;
+  }
+
+  /* ---- options ---- */
+  .options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .option {
+    border: 1px solid var(--rule); cursor: pointer; padding: 0;
+  }
+  .option:hover { border-color: var(--ink-secondary); }
+  .option.selected { border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink); }
+  .option .head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 12px; border-bottom: 1px solid var(--rule);
+  }
+  .option .head .letter {
+    width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--ink-secondary); font-size: 10px;
+  }
+  .option .head h3 { font-size: 11px; margin: 0; letter-spacing: .04em; }
+  .option .body { padding: 14px; background: #050506; }
+  .option .desc { font-size: 10px; color: var(--ink-secondary); padding: 10px 12px; line-height: 1.5; border-top: 1px solid var(--rule); }
+
+  .option .row .k { min-width: 130px; }
+
+  footer { margin-top: 30px; font-size: 10px; color: var(--dim); }
+</style>
+</head>
+<body>
+  <h1>Console Hub — text hierarchy pass</h1>
+  <p class="lede">
+    The complaint: adjacent labels of the same visual "weight" read as randomly
+    brighter or duller. Root cause — <code class="mono">--ink-muted</code> (#8e8e88) and
+    <code class="mono">--dim</code> (#83837d) sit 6 luminance units apart, effectively
+    indistinguishable side by side, but the CSS applies them to the same kind of label
+    (tags, secondary metadata) inconsistently rather than by a fixed rule. Same role,
+    different token, so the eye reads it as noise rather than a hierarchy.
+  </p>
+
+  <section>
+    <h2>The four tokens, actually compared</h2>
+    <div class="swatchRow">
+      <div class="swatch"><div class="chip" style="background:#ededea"></div><div class="label">--ink</div><div class="hex">#ededea</div><div class="luma">contrast on page: 17.8:1</div></div>
+      <div class="swatch"><div class="chip" style="background:#c4c4be"></div><div class="label">--ink-secondary</div><div class="hex">#c4c4be</div><div class="luma">contrast on page: 12.6:1</div></div>
+      <div class="swatch"><div class="chip" style="background:#8e8e88"></div><div class="label">--ink-muted</div><div class="hex">#8e8e88</div><div class="luma">contrast on page: 5.5:1</div></div>
+      <div class="swatch"><div class="chip" style="background:#83837d"></div><div class="label">--dim</div><div class="hex">#83837d</div><div class="luma">contrast on page: 5.2:1</div></div>
+    </div>
+    <p class="lede" style="margin:0">
+      ink-muted and dim differ by 0.3:1 of contrast — not a visible step. They function as
+      one gray with two names.
+    </p>
+  </section>
+
+  <section>
+    <h2>Current state, reproduced</h2>
+    <div class="panel current">
+      <div class="row">
+        <span class="k a">Route "read only" tag</span>
+        <span class="tag a">READ ONLY</span>
+        <span class="note">HubShell .route i — ink-muted</span>
+      </div>
+      <div class="row">
+        <span class="k b">Workspace "unset" badge</span>
+        <span class="tag b">UNSET</span>
+        <span class="note">HubShell .workspaceBadge — dim</span>
+      </div>
+      <div class="row">
+        <span class="k a">Worker metric key ("RATE")</span>
+        <span class="tag a" style="font-size:6.5px">RATE</span>
+        <span class="note">WorkerCard .metricKey — dim, 6.5px</span>
+      </div>
+      <div class="row">
+        <span class="k b">Stack slot role ("WORKER")</span>
+        <span class="tag b">WORKER</span>
+        <span class="note">HubShell .role — dim</span>
+      </div>
+      <div class="row">
+        <span class="k a">Recipe badge ("READ ONLY")</span>
+        <span class="tag a">READ ONLY</span>
+        <span class="note">QuestionFanPlate .recipeBadge — dim</span>
+      </div>
+    </div>
+    <div class="callout">
+      Four labels that all mean "secondary, quiet metadata" — split across two tokens with
+      no rule deciding which gets which. That's the flicker you're seeing.
+    </div>
+  </section>
+
+  <section>
+    <h2>Three ways to fix it — pick one</h2>
+    <div class="options">
+
+      <div class="option" data-choice="a" onclick="toggleSelect(this)">
+        <div class="head"><div class="letter">A</div><h3>Collapse to 3 tiers</h3></div>
+        <div class="body">
+          <div class="row"><span class="k" style="color:var(--ink)">Primary label</span><span class="note">ink</span></div>
+          <div class="row"><span class="k" style="color:var(--ink-secondary)">Secondary value</span><span class="note">ink-secondary</span></div>
+          <div class="row"><span class="k" style="color:var(--ink-muted)">Tag / metadata / disabled</span><span class="note">ink-muted only</span></div>
+        </div>
+        <div class="desc">
+          Delete <span class="mono">--dim</span> as a text color. Every tag, disabled state,
+          and metadata line moves to <span class="mono">--ink-muted</span>. One quiet gray,
+          used everywhere quiet text appears. Fewest tokens, fastest, zero ambiguity going
+          forward — but loses a rung between "quiet" and "barely there."
+        </div>
+      </div>
+
+      <div class="option" data-choice="b" onclick="toggleSelect(this)">
+        <div class="head"><div class="letter">B</div><h3>Widen the gap, keep 4 tiers</h3></div>
+        <div class="body">
+          <div class="row"><span class="k" style="color:var(--ink)">Primary label</span><span class="note">ink</span></div>
+          <div class="row"><span class="k" style="color:var(--ink-secondary)">Secondary value</span><span class="note">ink-secondary</span></div>
+          <div class="row"><span class="k" style="color:#9a9a94">Tag / active metadata</span><span class="note">ink-muted, lightened</span></div>
+          <div class="row"><span class="k" style="color:#6b6b64">Disabled / placeholder only</span><span class="note">dim, darkened</span></div>
+        </div>
+        <div class="desc">
+          Keep four tiers, but separate <span class="mono">--ink-muted</span> from
+          <span class="mono">--dim</span> by enough contrast to actually see (push muted to
+          ~#9a9a94, dim to ~#6b6b64), then enforce a rule: muted is "quiet but live" (tags,
+          role labels), dim is "inert" (disabled, placeholders, corner readouts) only.
+        </div>
+      </div>
+
+      <div class="option" data-choice="c" onclick="toggleSelect(this)">
+        <div class="head"><div class="letter">C</div><h3>Role-based token, same values</h3></div>
+        <div class="body">
+          <div class="row"><span class="k" style="color:var(--ink)">Primary label</span><span class="note">ink</span></div>
+          <div class="row"><span class="k" style="color:var(--ink-secondary)">Secondary value</span><span class="note">ink-secondary</span></div>
+          <div class="row"><span class="k" style="color:var(--ink-muted)">Metadata (tag, role, badge)</span><span class="note">ink-muted</span></div>
+          <div class="row"><span class="k" style="color:var(--dim)">Inert (disabled, placeholder)</span><span class="note">dim</span></div>
+        </div>
+        <div class="desc">
+          No token or value changes — just stop treating ink-muted/dim as interchangeable.
+          Write the rule into DESIGN.md and re-map every current mismatch (WorkerCard's
+          RATE/TOKENS keys, HubShell's role/badge labels) to the correct one. Cheapest
+          change, but the two tiers stay visually indistinguishable, so a future edit can
+          drift right back.
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <footer>Reply in the terminal with A, B, or C — or describe a different fix. This is a preview only; nothing here is wired to real code yet.</footer>
+
+<script>
+function toggleSelect(el) {
+  document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  if (window.recordEvent) window.recordEvent({ choice: el.dataset.choice });
+}
+</script>
+</body>
+</html>
