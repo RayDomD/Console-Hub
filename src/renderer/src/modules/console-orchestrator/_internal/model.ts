@@ -70,17 +70,19 @@ const MISSION_INTENTS: ReadonlyArray<{ phrases: string[]; command: string; phase
 ]
 
 /**
- * Exact commands Console Hub may consume before they reach an agent CLI. Slash
- * shortcuts always count; a natural reply counts only where `phase` makes it
- * unambiguous.
+ * Commands Console Hub may consume before they reach an agent CLI. Every
+ * `/mission` line always counts - including a free-form draft request - so
+ * one never leaks to the CLI's own slash-command parser as "unknown skill".
+ * A natural reply counts only where `phase` makes it unambiguous.
  */
 export function missionCommand(line: string, phase?: MissionPhase): string | undefined {
-  const normalized = line.trim().toLowerCase().replace(/\s+/g, ' ')
+  const trimmed = line.trim().replace(/\s+/g, ' ')
+  const normalized = trimmed.toLowerCase()
   const match = normalized.match(/^\/mission(?: (.*))?$/)
   if (match) {
     const argument = match[1] ?? ''
     if (MISSION_COMMANDS.has(argument) || /^retry [a-z][a-z0-9-]*$/.test(argument)) return normalized
-    return undefined
+    return trimmed
   }
   const intent = MISSION_INTENTS.find((entry) => entry.phrases.includes(normalized))
   if (intent) return phase && intent.phases.includes(phase) ? intent.command : undefined

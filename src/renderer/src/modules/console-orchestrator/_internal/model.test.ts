@@ -95,7 +95,8 @@ describe('missionCommand', () => {
     expect(missionCommand('/mission')).toBe('/mission')
     expect(missionCommand('/MISSION run')).toBe('/mission run')
     expect(missionCommand('/mission review')).toBe('/mission review')
-    expect(missionCommand('/mission do something')).toBeUndefined()
+    expect(missionCommand('/mission do something')).toBe('/mission do something')
+    expect(missionCommand('/mission Find out if Jev can be implemented in Cockpit')).toBe('/mission Find out if Jev can be implemented in Cockpit')
     expect(missionCommand('explain the mission')).toBeUndefined()
   })
 
